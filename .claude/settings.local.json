@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/local/lib/node_modules/npm/bin/**)",
+      "Bash(source ~/.nvm/nvm.sh)",
+      "Bash(nvm use:*)",
+      "Bash(npm --version)",
+      "Bash(npm install:*)",
+      "Bash(npx astro:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''scripts'''',{}\\), indent=2\\)\\)\")",
+      "Bash(/Users/guymei-tal/.nvm/versions/node/v20.11.1/bin/node node_modules/.bin/astro check)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(PATH=\"/Users/guymei-tal/.nvm/versions/node/v20.11.1/bin:$PATH\" npm install --save-dev @types/node)",
+      "Bash(PATH=\"/Users/guymei-tal/.nvm/versions/node/v20.11.1/bin:$PATH\" npx astro check)"
+    ]
+  }
+}

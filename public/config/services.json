@@ -1,0 +1,580 @@
+{
+  "trustSignals": {
+    "enabled": true,
+    "rating": "4.9",
+    "reviewCount": "127",
+    "jobCount": "2,500+",
+    "badges": [
+      "Licensed & Insured",
+      "Same-Day Service"
+    ]
+  },
+  "availability": {
+    "enabled": true,
+    "message": "Technician available today"
+  },
+  "contact": {
+    "louisville": {
+      "label": "Louisville",
+      "display": "502-619-5198",
+      "href": "tel:5026195198"
+    },
+    "lexington": {
+      "label": "Lexington",
+      "display": "859-436-2954",
+      "href": "tel:8594362954"
+    },
+    "nky": {
+      "label": "Northern KY",
+      "display": "859-306-0782",
+      "href": "tel:8593060782"
+    }
+  },
+  "services": [
+    {
+      "id": "spring_repair",
+      "label": "Spring Repair",
+      "subtitle": "Most spring repairs completed same-day.",
+      "description": "Loud bang, door won't open, or cable fell",
+      "qualifier": {
+        "question": "How wide is your garage door?",
+        "pills": [
+          {
+            "label": "Single car (8–9 ft)"
+          },
+          {
+            "label": "Double car (14–18 ft)"
+          },
+          {
+            "label": "Not sure"
+          }
+        ]
+      },
+      "tiers": [
+        {
+          "label": "Good",
+          "headline": "Single Spring",
+          "summary": "Replaces only the broken spring. Gets you back up and running fast.",
+          "upgradeWarning": "When one spring breaks, the other is close behind. We always recommend replacing both springs to prevent a second failure and avoid paying for two service calls.",
+          "price": "$335",
+          "priceRange": "– $415",
+          "image": "/images/spring-single.webp",
+          "features": [
+            "Single spring replacement",
+            "Standard spring (5,000 cycle life)",
+            "90-day parts warranty",
+            "Safety test included"
+          ],
+          "cta": "Book Good"
+        },
+        {
+          "label": "Better",
+          "headline": "Both Springs Replaced",
+          "summary": "Replace both springs at once — prevents the second one from breaking next month. Best value for long-term reliability.",
+          "price": "$525",
+          "priceRange": "– $625",
+          "image": "/images/spring-double.webp",
+          "features": [
+            "Both springs replaced",
+            "High-cycle spring (10,000+ cycles)",
+            "Full door tune-up included",
+            "Cable inspection",
+            "1-year parts warranty"
+          ],
+          "cta": "Book Better",
+          "popular": true
+        },
+        {
+          "label": "Best",
+          "headline": "Full Spring System",
+          "summary": "Complete spring system overhaul — new springs, cables, bearings and hardware. Maximum lifespan.",
+          "price": "$750",
+          "priceRange": "– $795",
+          "image": "/images/spring-double.webp",
+          "features": [
+            "Both high-cycle springs (20,000+ cycles)",
+            "New cables & end bearings",
+            "Full hardware inspection",
+            "Balance and safety test",
+            "5-year parts & labor warranty"
+          ],
+          "cta": "Book Best"
+        }
+      ]
+    },
+    {
+      "id": "cable_roller",
+      "label": "Cable & Roller Repair",
+      "subtitle": "Cable and roller issues often fixed same-hour.",
+      "description": "Door off-track, snapped cable, or grinding noise",
+      "qualifier": {
+        "question": "What's the main symptom?",
+        "pills": [
+          {
+            "label": "Off track"
+          },
+          {
+            "label": "Frayed or broken cable"
+          },
+          {
+            "label": "Noisy rollers"
+          },
+          {
+            "label": "Moves unevenly"
+          }
+        ]
+      },
+      "tiers": [
+        {
+          "label": "Good",
+          "headline": "Single Cable",
+          "summary": "Replaces the broken cable to get your door moving again.",
+          "price": "$129",
+          "priceRange": "– $179",
+          "image": "/images/prime-line-garage-door-hardware-gd-52161-64_600-1775315336266.avif",
+          "features": [
+            "Single cable replacement",
+            "Standard galvanized cable",
+            "90-day parts warranty",
+            "Safety check included"
+          ],
+          "cta": "Book Good"
+        },
+        {
+          "label": "Better",
+          "headline": "Both Cables + Rollers",
+          "summary": "Both cables plus new nylon rollers — quieter and smoother operation.",
+          "price": "$249",
+          "priceRange": "– $329",
+          "image": "/images/cable_drum_-1775315342673.webp",
+          "features": [
+            "Both cables replaced",
+            "Nylon roller upgrade (12-pack)",
+            "Track alignment check",
+            "Door lubrication",
+            "1-year parts warranty"
+          ],
+          "cta": "Book Better",
+          "popular": true
+        },
+        {
+          "label": "Best",
+          "headline": "Full Cable System",
+          "summary": "Complete cable system rebuild — cables, drums, rollers and full realignment.",
+          "price": "$349",
+          "priceRange": "– $449",
+          "image": "/images/s-l400-1775315348971.png",
+          "features": [
+            "Both cables + drums replaced",
+            "Premium nylon rollers",
+            "Full track realignment",
+            "Spring tension check",
+            "2-year parts & labor warranty"
+          ],
+          "cta": "Book Best"
+        }
+      ]
+    },
+    {
+      "id": "opener_repair",
+      "label": "Opener Repair",
+      "subtitle": "Most opener issues diagnosed and fixed on the first visit.",
+      "description": "Motor won't run, remote issues, or sensor problems",
+      "qualifier": {
+        "question": "What's happening with your opener?",
+        "pills": [
+          {
+            "label": "Wall button won't work"
+          },
+          {
+            "label": "Remote stopped working",
+            "action": "info",
+            "infoKey": "opener_remote"
+          },
+          {
+            "label": "Hums but won't move",
+            "action": "redirect",
+            "redirect": "opener_replace"
+          },
+          {
+            "label": "Sensor light blinking"
+          }
+        ]
+      },
+      "tiers": [
+        {
+          "label": "Good",
+          "headline": "Basic Repair",
+          "summary": "Single-issue diagnostic and repair. Gets your opener running again.",
+          "price": "$99",
+          "priceRange": "– $149",
+          "image": "/images/opener-basic.svg",
+          "features": [
+            "Diagnostic & single repair",
+            "Remote reprogramming if needed",
+            "Safety sensor adjustment",
+            "90-day labor warranty"
+          ],
+          "cta": "Book Good"
+        },
+        {
+          "label": "Better",
+          "headline": "Full Diagnostic",
+          "summary": "Complete opener inspection — logic board, sensors, remotes all checked and fixed.",
+          "price": "$179",
+          "priceRange": "– $249",
+          "image": "/images/opener-diagnostic.svg",
+          "features": [
+            "Complete opener diagnostic",
+            "Logic board inspection",
+            "New safety sensors if needed",
+            "Remote & keypad programming",
+            "1-year labor warranty"
+          ],
+          "cta": "Book Better",
+          "popular": true
+        },
+        {
+          "label": "Best",
+          "headline": "Repair + Tune-Up",
+          "summary": "Full opener repair plus complete door tune-up. Everything serviced top to bottom.",
+          "price": "$279",
+          "priceRange": "– $349",
+          "image": "/images/opener-tuneup.svg",
+          "features": [
+            "Full opener repair",
+            "Complete door tune-up",
+            "All sensors & accessories",
+            "Wi-Fi module setup (if compatible)",
+            "2-year parts & labor warranty"
+          ],
+          "cta": "Book Best"
+        }
+      ]
+    },
+    {
+      "id": "opener_replace",
+      "label": "New Opener Install",
+      "subtitle": "We install LiftMaster, Chamberlain, and Amarr openers.",
+      "description": "Replace old or broken opener with a new model",
+      "qualifier": {
+        "question": "What type of opener?",
+        "pills": [
+          {
+            "label": "Chain Drive",
+            "cardIcon": "chain",
+            "cardDesc": "Reliable & affordable. Works great for detached garages.",
+            "cardTag": "Most common · 1/2 HP",
+            "tiers": [
+              {
+                "label": "Good",
+                "headline": "Basic Chain Drive",
+                "price": "$550",
+                "priceRange": "– $625",
+                "financing": "As low as $35/mo",
+                "cta": "Book Good",
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316112959.avif",
+                "features": [
+                  "Chamberlain 1/2 HP chain drive",
+                  "2 remotes + wall button",
+                  "Safety sensors included",
+                  "Professional installation",
+                  "1-year parts warranty"
+                ]
+              },
+              {
+                "label": "Better",
+                "headline": "Chain Drive + Keypad",
+                "price": "$625",
+                "priceRange": "– $725",
+                "financing": "As low as $42/mo",
+                "cta": "Book Better",
+                "popular": true,
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316112959.avif",
+                "features": [
+                  "Chamberlain 1/2 HP chain drive",
+                  "2 remotes + wall button + keypad",
+                  "Premium safety sensors",
+                  "Professional installation",
+                  "2-year parts warranty"
+                ]
+              },
+              {
+                "label": "Best",
+                "headline": "Chain Drive Full Package",
+                "price": "$725",
+                "priceRange": "– $825",
+                "financing": "As low as $50/mo",
+                "cta": "Book Best",
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316112959.avif",
+                "features": [
+                  "Chamberlain 3/4 HP chain drive",
+                  "2 remotes + wall button + keypad",
+                  "Premium safety sensors",
+                  "Battery backup",
+                  "Professional installation",
+                  "3-year parts & labor warranty"
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Belt Drive",
+            "cardIcon": "belt",
+            "cardDesc": "Whisper-quiet. Ideal when living space is above the garage.",
+            "cardTag": "Quietest option · 3/4 HP",
+            "tiers": [
+              {
+                "label": "Good",
+                "headline": "Basic Belt Drive",
+                "price": "$685",
+                "priceRange": "– $785",
+                "financing": "As low as $49/mo",
+                "cta": "Book Good",
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316116041.avif",
+                "features": [
+                  "Chamberlain 3/4 HP belt drive",
+                  "2 remotes + wall button",
+                  "Safety sensors included",
+                  "Professional installation",
+                  "1-year parts warranty"
+                ]
+              },
+              {
+                "label": "Better",
+                "headline": "Belt Drive + WiFi",
+                "price": "$785",
+                "priceRange": "– $885",
+                "financing": "As low as $55/mo",
+                "cta": "Book Better",
+                "popular": true,
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316116041.avif",
+                "features": [
+                  "Chamberlain 1.25 HP belt drive",
+                  "Built-in WiFi + myQ app",
+                  "2 remotes + wall button + keypad",
+                  "Battery backup",
+                  "2-year parts warranty"
+                ]
+              },
+              {
+                "label": "Best",
+                "headline": "Belt Drive Premium",
+                "price": "$885",
+                "priceRange": "– $985",
+                "financing": "As low as $62/mo",
+                "cta": "Book Best",
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316116041.avif",
+                "features": [
+                  "Chamberlain 1.25 HP belt drive",
+                  "Built-in WiFi + myQ app",
+                  "2 remotes + wall button + keypad",
+                  "Battery backup",
+                  "Full accessory package",
+                  "3-year parts & labor warranty"
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Smart Belt Drive",
+            "cardIcon": "smart",
+            "cardDesc": "App control, built-in camera & battery backup. Premium pick.",
+            "cardTag": "WiFi + myQ · Smart home ready",
+            "tiers": [
+              {
+                "label": "Good",
+                "headline": "Smart Belt Drive",
+                "price": "$799",
+                "priceRange": "– $899",
+                "financing": "As low as $65/mo",
+                "cta": "Book Good",
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316120514.avif",
+                "features": [
+                  "Chamberlain 1.5 HP smart belt drive",
+                  "Built-in WiFi + myQ app",
+                  "2 remotes + wall button",
+                  "Battery backup",
+                  "Professional installation",
+                  "2-year parts warranty"
+                ]
+              },
+              {
+                "label": "Better",
+                "headline": "Smart Drive + Camera",
+                "price": "$899",
+                "priceRange": "– $999",
+                "financing": "As low as $72/mo",
+                "cta": "Book Better",
+                "popular": true,
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316120514.avif",
+                "features": [
+                  "Chamberlain 1.5 HP smart belt drive",
+                  "Built-in WiFi & camera",
+                  "myQ app control",
+                  "2 remotes + wall button + keypad",
+                  "Battery backup",
+                  "3-year parts warranty"
+                ]
+              },
+              {
+                "label": "Best",
+                "headline": "Smart Drive Ultimate",
+                "price": "$999",
+                "priceRange": "– $1,099",
+                "financing": "As low as $80/mo",
+                "cta": "Book Best",
+                "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316120514.avif",
+                "features": [
+                  "Chamberlain 1.5 HP smart belt drive",
+                  "Built-in WiFi & camera",
+                  "myQ app control",
+                  "2 remotes + wall button + keypad",
+                  "Battery backup",
+                  "Full accessory package",
+                  "5-year parts & labor warranty"
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Help Me Choose",
+            "cardIcon": "help",
+            "cardDesc": "Not sure which is right? We'll guide you through it.",
+            "cardTag": "Takes 30 seconds",
+            "action": "explain"
+          }
+        ]
+      },
+      "tiers": [
+        {
+          "label": "Good",
+          "headline": "Chamberlain Chain Drive",
+          "summary": "Reliable and affordable. Great for detached garages where noise isn't a concern.",
+          "price": "$550",
+          "priceRange": "– $625",
+          "financing": "As low as $35/mo",
+          "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316112959.avif",
+          "features": [
+            "Chamberlain 1/2 HP chain drive",
+            "2 remotes + wall button",
+            "Safety sensors included",
+            "Professional installation",
+            "1-year parts warranty"
+          ],
+          "cta": "Book Good"
+        },
+        {
+          "label": "Better",
+          "headline": "Chamberlain Belt Drive + WiFi",
+          "summary": "Whisper-quiet belt drive with smartphone control via myQ app. Battery backup included.",
+          "price": "$685",
+          "priceRange": "– $785",
+          "financing": "As low as $49/mo",
+          "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316116041.avif",
+          "features": [
+            "Chamberlain 1.5 HP belt drive",
+            "Built-in WiFi + myQ app",
+            "2 remotes + wall button + keypad",
+            "Battery backup",
+            "2-year parts warranty"
+          ],
+          "cta": "Book Better",
+          "popular": true
+        },
+        {
+          "label": "Best",
+          "headline": "Chamberlain Smart Belt Drive",
+          "summary": "Premium smart opener with built-in camera, WiFi, battery backup and full accessory package.",
+          "price": "$799",
+          "priceRange": "– $899",
+          "financing": "As low as $65/mo",
+          "image": "/images/chamberlain-garage-door-openers-d1000-64_600-1775316120514.avif",
+          "features": [
+            "Chamberlain 1.5 HP smart belt drive",
+            "Built-in WiFi & camera",
+            "myQ app control",
+            "Battery backup",
+            "Full accessory package",
+            "3-year parts warranty"
+          ],
+          "cta": "Book Best"
+        }
+      ]
+    },
+    {
+      "id": "tuneup",
+      "label": "Tune-Up & Maintenance",
+      "subtitle": "Regular maintenance extends your door's life by years.",
+      "description": "Noisy, slow, or due for annual service",
+      "qualifier": {
+        "question": "When was your last service?",
+        "pills": [
+          {
+            "label": "Never / unknown"
+          },
+          {
+            "label": "Over 2 years ago"
+          },
+          {
+            "label": "Within the last year"
+          },
+          {
+            "label": "Just making noise"
+          }
+        ]
+      },
+      "tiers": [
+        {
+          "label": "Good",
+          "headline": "Basic Tune-Up",
+          "summary": "Essential lubrication and safety check. Quick service to quiet a noisy door.",
+          "price": "$79",
+          "priceRange": "– $129",
+          "image": "/images/dreamstime_xxl_100062584-min_2-1775315445190.jpg",
+          "features": [
+            "Lubricate all moving parts",
+            "Tighten hardware",
+            "Safety sensor test",
+            "Visual inspection"
+          ],
+          "cta": "Book Good"
+        },
+        {
+          "label": "Better",
+          "headline": "Full Tune-Up",
+          "summary": "Complete maintenance with spring adjustment, balance test and written service report.",
+          "price": "$129",
+          "priceRange": "– $169",
+          "image": "/images/dreamstime_xxl_100062584-min_2-1775315492503.jpg",
+          "features": [
+            "Everything in Basic",
+            "Spring tension adjustment",
+            "Balance & force test",
+            "Weather seal inspection",
+            "Written service report"
+          ],
+          "cta": "Book Better",
+          "popular": true
+        },
+        {
+          "label": "Best",
+          "headline": "Premium Maintenance",
+          "summary": "Everything serviced plus new rollers and a 6-month follow-up. Maximum door lifespan.",
+          "price": "$199",
+          "priceRange": "– $269",
+          "image": "/images/dreamstime_xxl_100062584-min_2-1775315497473.jpg",
+          "features": [
+            "Everything in Full Tune-Up",
+            "Roller replacement (nylon)",
+            "Cable & drum inspection",
+            "Opener performance test",
+            "6-month follow-up included"
+          ],
+          "cta": "Book Best"
+        }
+      ]
+    }
+  ],
+  "smsTemplate": "Hi {name}! Thanks for requesting a {tier} {service} appointment (estimated {price}) with Derby Strong Garage Doors. A specialist will contact you shortly to confirm your visit. Questions? Call us at 502-619-5198."
+}

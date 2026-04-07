@@ -1,0 +1,17 @@
+---
+export const prerender = true;
+import Layout from '../layouts/Layout.astro';
+import QuoteWidget from '../components/QuoteWidget/QuoteWidget.astro';
+---
+<Layout title="Derby Strong — Widget Test">
+  <h1>Derby Strong Quote Widget</h1>
+  <p>
+    The amber "Instant Quote" button is pinned to the bottom-right corner.
+    On mobile it becomes a compact floating pill in the bottom-right corner.
+  </p>
+  <p style="margin-top:1rem;">
+    <strong>Test flows:</strong> Try "I know my issue" → pick a service → answer the question → see pricing.
+    Or try the AI chat to describe a problem and let it route you automatically.
+  </p>
+  <QuoteWidget />
+</Layout>

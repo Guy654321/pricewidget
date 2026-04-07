@@ -1,0 +1,36 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = 'Derby Strong Widget Dev' } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #e8ecf0;
+      color: #0e121b;
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+    h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    p  { color: #475569; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <slot />
+  </div>
+</body>
+</html>

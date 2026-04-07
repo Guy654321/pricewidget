@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "derby-widget (dev)",
+      "runtimeExecutable": "/Users/guymei-tal/.nvm/versions/node/v20.11.1/bin/node",
+      "runtimeArgs": ["/Users/guymei-tal/Desktop/derby-widget/node_modules/.bin/astro", "dev"],
+      "port": 4321
+    },
+    {
+      "name": "3locationgaragedoors (main site dev)",
+      "runtimeExecutable": "/Users/guymei-tal/.nvm/versions/node/v20.11.1/bin/node",
+      "runtimeArgs": ["/Users/guymei-tal/3locationgaragedoors/node_modules/.bin/astro", "dev", "--root", "/Users/guymei-tal/3locationgaragedoors"],
+      "port": 4322
+    }
+  ]
+}

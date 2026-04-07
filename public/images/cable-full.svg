@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160">
+  <rect width="200" height="160" rx="12" ry="12" fill="#f1f5f9"/>
+  <!-- Drum (rectangular) -->
+  <rect x="130" y="35" width="45" height="30" rx="4" fill="none" stroke="#0F3D3E" stroke-width="2.5"/>
+  <line x1="137" y1="35" x2="137" y2="65" stroke="#64748B" stroke-width="1"/>
+  <line x1="144" y1="35" x2="144" y2="65" stroke="#64748B" stroke-width="1"/>
+  <line x1="151" y1="35" x2="151" y2="65" stroke="#64748B" stroke-width="1"/>
+  <!-- Drum axle -->
+  <circle cx="152" cy="50" r="4" fill="#FFB703"/>
+  <!-- Cable from drum going down and across -->
+  <path d="M130,50 C110,50 90,70 70,90 C55,105 40,110 30,110" fill="none" stroke="#0F3D3E" stroke-width="3" stroke-linecap="round"/>
+  <!-- Cable end fitting -->
+  <circle cx="30" cy="110" r="5" fill="#64748B"/>
+  <circle cx="30" cy="110" r="2" fill="#f1f5f9"/>
+  <!-- Mounting bracket -->
+  <line x1="152" y1="25" x2="152" y2="35" stroke="#64748B" stroke-width="2"/>
+  <line x1="142" y1="25" x2="162" y2="25" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+</svg>

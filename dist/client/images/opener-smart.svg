@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160">
+  <rect width="200" height="160" rx="12" ry="12" fill="#f1f5f9"/>
+  <!-- Smart opener body -->
+  <rect x="30" y="25" width="140" height="50" rx="8" fill="#0F3D3E"/>
+  <rect x="35" y="30" width="130" height="40" rx="5" fill="none" stroke="#64748B" stroke-width="1"/>
+  <!-- Chamberlain text -->
+  <text x="100" y="45" font-family="Arial, sans-serif" font-size="7" fill="#64748B" text-anchor="middle" letter-spacing="1">CHAMBERLAIN</text>
+  <!-- Camera lens -->
+  <circle cx="60" cy="58" r="7" fill="#1a5253" stroke="#64748B" stroke-width="1.5"/>
+  <circle cx="60" cy="58" r="4" fill="#0a2e2f"/>
+  <circle cx="60" cy="58" r="2" fill="#FFB703" opacity="0.6"/>
+  <!-- WiFi icon -->
+  <g transform="translate(110,56)">
+    <path d="M-8,-6 C-4,-10 4,-10 8,-6" fill="none" stroke="#FFB703" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M-5,-3 C-2,-6 2,-6 5,-3" fill="none" stroke="#FFB703" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="1.5" fill="#FFB703"/>
+  </g>
+  <!-- Phone icon -->
+  <g transform="translate(148,55)">
+    <rect x="-6" y="-10" width="12" height="18" rx="2" fill="none" stroke="#FFB703" stroke-width="1.5"/>
+    <line x1="-3" y1="5" x2="3" y2="5" stroke="#FFB703" stroke-width="1" stroke-linecap="round"/>
+  </g>
+  <!-- Rail -->
+  <rect x="93" y="75" width="14" height="6" rx="2" fill="#64748B"/>
+  <!-- Belt line -->
+  <line x1="35" y1="85" x2="165" y2="85" stroke="#0F3D3E" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Trolley -->
+  <rect x="92" y="91" width="16" height="18" rx="3" fill="none" stroke="#64748B" stroke-width="1.5"/>
+  <!-- LED -->
+  <circle cx="100" cy="115" r="3" fill="#FFB703"/>
+</svg>

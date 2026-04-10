@@ -1,0 +1,16 @@
+---
+export const prerender = true;
+import Layout from '../layouts/Layout.astro';
+import QuoteWidget from '../components/QuoteWidget/QuoteWidget.astro';
+---
+<Layout title="Instant Quote Test — Derby Strong" noindex={true}>
+  <h1>Instant Quote (Private Test Route)</h1>
+  <p>
+    This route is intended for internal QA and approval before linking the flow into
+    main site navigation.
+  </p>
+  <p style="margin-top:1rem;">
+    Route: <code>/instant-quote-test</code>
+  </p>
+  <QuoteWidget />
+</Layout>

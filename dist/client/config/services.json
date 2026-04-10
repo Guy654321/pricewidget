@@ -1,4 +1,5 @@
 {
+  "priceFlow": "price-first",
   "trustSignals": {
     "enabled": true,
     "rating": "4.9",

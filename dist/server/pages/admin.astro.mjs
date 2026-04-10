@@ -208,6 +208,7 @@ const $$Admin = createComponent(async ($$result, $$props, $$slots) => {
 
       // \u2500\u2500 Settings panel (trust signals + availability + SMS) \u2500\u2500\u2500\u2500
       html += '<div class="admin-tab-panel" data-tab="settings">';
+      html += renderPriceFlowPanel();
       html += renderSettingsPanel();
       html += renderSmsTemplatePanel();
       html += '</div>';
@@ -797,6 +798,28 @@ const $$Admin = createComponent(async ($$result, $$props, $$slots) => {
     }
 
     // \u2500\u2500 Settings panel rendering \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    function renderPriceFlowPanel() {
+      var pf = config.priceFlow === 'info-first' ? 'info-first' : 'price-first';
+      return (
+        '<div class="admin-settings-card">' +
+          '<h3>Quote Flow (Test)</h3>' +
+          '<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Choose whether the widget captures the visitor\\u2019s contact info before or after they see pricing. Affects both the "I know my issue" and opener-guide paths.</p>' +
+          '<div class="admin-toggle-row" style="align-items:flex-start;gap:10px;">' +
+            '<input type="radio" name="price-flow" id="pf-price-first" value="price-first"' + (pf === 'price-first' ? ' checked' : '') + ' />' +
+            '<label for="pf-price-first" style="line-height:1.4;">' +
+              '<strong>Price first</strong> \\u2014 show tiered pricing immediately, collect contact info only when they click Book. <em style="color:#64748b;">(Default, least friction)</em>' +
+            '</label>' +
+          '</div>' +
+          '<div class="admin-toggle-row" style="align-items:flex-start;gap:10px;margin-top:8px;">' +
+            '<input type="radio" name="price-flow" id="pf-info-first" value="info-first"' + (pf === 'info-first' ? ' checked' : '') + ' />' +
+            '<label for="pf-info-first" style="line-height:1.4;">' +
+              '<strong>Info first</strong> \\u2014 require name, phone & ZIP <em>before</em> showing pricing. <em style="color:#64748b;">(Higher lead capture, more friction)</em>' +
+            '</label>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
     function renderSettingsPanel() {
       var ts = config.trustSignals || { enabled: false, rating: '4.9', reviewCount: '127', jobCount: '2,500+', badges: ['Licensed & Insured', 'Same-Day Service'] };
       var av = config.availability || { enabled: false, message: 'Technician available today' };
@@ -854,6 +877,12 @@ const $$Admin = createComponent(async ($$result, $$props, $$slots) => {
     var origReadFormIntoConfig = readFormIntoConfig;
     readFormIntoConfig = function () {
       origReadFormIntoConfig();
+
+      // Price flow toggle
+      var pfChecked = document.querySelector('input[name="price-flow"]:checked');
+      if (pfChecked) {
+        config.priceFlow = pfChecked.value === 'info-first' ? 'info-first' : 'price-first';
+      }
 
       // Trust signals
       var trustEnabled = document.getElementById('trust-enabled');
@@ -1408,6 +1437,7 @@ const $$Admin = createComponent(async ($$result, $$props, $$slots) => {
 
       // \u2500\u2500 Settings panel (trust signals + availability + SMS) \u2500\u2500\u2500\u2500
       html += '<div class="admin-tab-panel" data-tab="settings">';
+      html += renderPriceFlowPanel();
       html += renderSettingsPanel();
       html += renderSmsTemplatePanel();
       html += '</div>';
@@ -1997,6 +2027,28 @@ const $$Admin = createComponent(async ($$result, $$props, $$slots) => {
     }
 
     // \u2500\u2500 Settings panel rendering \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    function renderPriceFlowPanel() {
+      var pf = config.priceFlow === 'info-first' ? 'info-first' : 'price-first';
+      return (
+        '<div class="admin-settings-card">' +
+          '<h3>Quote Flow (Test)</h3>' +
+          '<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Choose whether the widget captures the visitor\\\\u2019s contact info before or after they see pricing. Affects both the "I know my issue" and opener-guide paths.</p>' +
+          '<div class="admin-toggle-row" style="align-items:flex-start;gap:10px;">' +
+            '<input type="radio" name="price-flow" id="pf-price-first" value="price-first"' + (pf === 'price-first' ? ' checked' : '') + ' />' +
+            '<label for="pf-price-first" style="line-height:1.4;">' +
+              '<strong>Price first</strong> \\\\u2014 show tiered pricing immediately, collect contact info only when they click Book. <em style="color:#64748b;">(Default, least friction)</em>' +
+            '</label>' +
+          '</div>' +
+          '<div class="admin-toggle-row" style="align-items:flex-start;gap:10px;margin-top:8px;">' +
+            '<input type="radio" name="price-flow" id="pf-info-first" value="info-first"' + (pf === 'info-first' ? ' checked' : '') + ' />' +
+            '<label for="pf-info-first" style="line-height:1.4;">' +
+              '<strong>Info first</strong> \\\\u2014 require name, phone & ZIP <em>before</em> showing pricing. <em style="color:#64748b;">(Higher lead capture, more friction)</em>' +
+            '</label>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
     function renderSettingsPanel() {
       var ts = config.trustSignals || { enabled: false, rating: '4.9', reviewCount: '127', jobCount: '2,500+', badges: ['Licensed & Insured', 'Same-Day Service'] };
       var av = config.availability || { enabled: false, message: 'Technician available today' };
@@ -2054,6 +2106,12 @@ const $$Admin = createComponent(async ($$result, $$props, $$slots) => {
     var origReadFormIntoConfig = readFormIntoConfig;
     readFormIntoConfig = function () {
       origReadFormIntoConfig();
+
+      // Price flow toggle
+      var pfChecked = document.querySelector('input[name="price-flow"]:checked');
+      if (pfChecked) {
+        config.priceFlow = pfChecked.value === 'info-first' ? 'info-first' : 'price-first';
+      }
 
       // Trust signals
       var trustEnabled = document.getElementById('trust-enabled');

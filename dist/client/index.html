@@ -22,12 +22,15 @@ For door replacements and installations, we want to measure and show you options
 const contactData = {"louisville":{"label":"Louisville","display":"502-619-5198","href":"tel:5026195198"},"lexington":{"label":"Lexington","display":"859-436-2954","href":"tel:8594362954"},"nky":{"label":"Northern KY","display":"859-306-0782","href":"tel:8593060782"}};
 const trustSignals = {"enabled":true,"rating":"4.9","reviewCount":"127","jobCount":"2,500+","badges":["Licensed & Insured","Same-Day Service"]};
 const availability = {"enabled":true,"message":"Technician available today"};
+const priceFlow = "price-first";
 
 (function () {
   'use strict';
 
   var SERVICES      = servicesData;
   var CONTACT       = contactData;
+  var PRICE_FLOW    = priceFlow || 'price-first';
+  var capturedLead  = null; // Stores { name, phone, zip } when info-first flow is used
   var TRUST_SIGNALS = trustSignals;
   var AVAILABILITY  = availability;
 
@@ -281,7 +284,7 @@ const availability = {"enabled":true,"message":"Technician available today"};
         selectedPill = pill.label;
 
         // Auto-advance to tiers after brief visual feedback
-        setTimeout(function () { goTo('tiers'); }, 200);
+        setTimeout(function () { goToTiersOrCapture(); }, 200);
       });
     });
   }
@@ -392,7 +395,16 @@ const availability = {"enabled":true,"message":"Technician available today"};
       }
     }
 
-    goTo('tiers');
+    goToTiersOrCapture();
+  }
+
+  // Centralized transition to tiers screen — respects info-first flow
+  function goToTiersOrCapture() {
+    if (PRICE_FLOW === 'info-first' && !capturedLead) {
+      showLeadCaptureForm(function () { goTo('tiers'); });
+    } else {
+      goTo('tiers');
+    }
   }
 
   // ── Opener Info screen ───────────────────────────────────────────────────────
@@ -486,7 +498,7 @@ const availability = {"enabled":true,"message":"Technician available today"};
       goTo('opener_guide');
     } else {
       selectedServiceId = target;
-      goTo('tiers');
+      goToTiersOrCapture();
     }
   });
 
@@ -773,7 +785,137 @@ const availability = {"enabled":true,"message":"Technician available today"};
       showBookingSuccess(modal, tier, svcLabel, price);
     });
 
+    // Pre-fill from captured lead (info-first flow)
+    if (capturedLead) {
+      if (capturedLead.name)  modal.querySelector('#ds-book-name').value = capturedLead.name;
+      if (capturedLead.phone) phoneInput.value = capturedLead.phone;
+      if (capturedLead.zip)   zipInput.value = capturedLead.zip;
+    }
+
     phoneInput.focus();
+  }
+
+  // ── Lead capture form (info-first flow) ─────────────────────────────────────
+  function showLeadCaptureForm(onDone) {
+    var existing = document.querySelector('.ds-booking-modal');
+    if (existing) existing.remove();
+
+    var svc = SERVICES.find(function (s) { return s.id === selectedServiceId; });
+    var svcLabel = svc ? svc.label : '';
+
+    var modal = document.createElement('div');
+    modal.className = 'ds-booking-modal ds-widget';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'ds-capture-title');
+
+    modal.innerHTML =
+      '<div class="ds-booking-modal-inner">' +
+        '<div class="ds-booking-modal-header">' +
+          '<span class="ds-booking-modal-title" id="ds-capture-title">Get your instant quote</span>' +
+        '</div>' +
+        '<form class="ds-booking-form" id="ds-capture-form" novalidate>' +
+          '<div class="ds-booking-selected">' +
+            '<strong>' + esc(svcLabel) + '</strong>' +
+            "Enter your details to see instant pricing. We'll save your info so you can book in one click." +
+          '</div>' +
+          '<div class="ds-form-row">' +
+            '<label class="ds-form-label" for="ds-cap-name">Your name <span>(optional)</span></label>' +
+            '<input class="ds-form-input" id="ds-cap-name" name="name" type="text" placeholder="Jane Smith" autocomplete="name" />' +
+          '</div>' +
+          '<div class="ds-form-row">' +
+            '<label class="ds-form-label" for="ds-cap-phone">Phone number <span>(required)</span></label>' +
+            '<input class="ds-form-input" id="ds-cap-phone" name="phone" type="tel" placeholder="502-555-0100" autocomplete="tel" inputmode="tel" />' +
+            '<span class="ds-form-error-msg" id="ds-cap-phone-err">Please enter a valid phone number.</span>' +
+          '</div>' +
+          '<div class="ds-form-row">' +
+            '<label class="ds-form-label" for="ds-cap-zip">ZIP code <span>(required)</span></label>' +
+            '<input class="ds-form-input" id="ds-cap-zip" name="zip" type="text" placeholder="40204" autocomplete="postal-code" inputmode="numeric" maxlength="5" />' +
+            '<span class="ds-form-error-msg" id="ds-cap-zip-err">Please enter a 5-digit ZIP code.</span>' +
+          '</div>' +
+        '</form>' +
+        '<div class="ds-booking-form-footer">' +
+          '<button class="ds-booking-submit" id="ds-capture-submit" type="button">See My Pricing</button>' +
+          '<button class="ds-booking-cancel" id="ds-capture-cancel" type="button">Cancel</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var nameInput  = modal.querySelector('#ds-cap-name');
+    var phoneInput = modal.querySelector('#ds-cap-phone');
+    var zipInput   = modal.querySelector('#ds-cap-zip');
+    var phoneErr   = modal.querySelector('#ds-cap-phone-err');
+    var zipErr     = modal.querySelector('#ds-cap-zip-err');
+    var submitBtn  = modal.querySelector('#ds-capture-submit');
+    var cancelBtn  = modal.querySelector('#ds-capture-cancel');
+
+    // Pre-fill if already captured
+    if (capturedLead) {
+      if (capturedLead.name)  nameInput.value  = capturedLead.name;
+      if (capturedLead.phone) phoneInput.value = capturedLead.phone;
+      if (capturedLead.zip)   zipInput.value   = capturedLead.zip;
+    }
+
+    function close() { modal.remove(); }
+    cancelBtn.addEventListener('click', close);
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+    document.addEventListener('keydown', function closeOnEsc(e) {
+      if (e.key === 'Escape') { close(); document.removeEventListener('keydown', closeOnEsc); }
+    });
+
+    submitBtn.addEventListener('click', function () {
+      var phone = phoneInput.value.trim().replace(/\D/g, '');
+      var zip   = zipInput.value.trim();
+      var valid = true;
+
+      if (phone.length < 10) {
+        phoneInput.classList.add('ds-input-error');
+        phoneErr.setAttribute('data-visible', 'true');
+        valid = false;
+      } else {
+        phoneInput.classList.remove('ds-input-error');
+        phoneErr.setAttribute('data-visible', 'false');
+      }
+      if (!/^\d{5}$/.test(zip)) {
+        zipInput.classList.add('ds-input-error');
+        zipErr.setAttribute('data-visible', 'true');
+        valid = false;
+      } else {
+        zipInput.classList.remove('ds-input-error');
+        zipErr.setAttribute('data-visible', 'false');
+      }
+      if (!valid) return;
+
+      capturedLead = {
+        name:  nameInput.value.trim(),
+        phone: phone,
+        zip:   zip,
+      };
+      fireGtm('lead_captured', { service_id: selectedServiceId, flow: 'info-first' });
+
+      // Save partial lead to server (non-blocking) — marked as "info-first"
+      var svc = SERVICES.find(function (s) { return s.id === selectedServiceId; });
+      fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: capturedLead.phone,
+          name:  capturedLead.name || '',
+          zip:   capturedLead.zip,
+          service:   svc ? svc.label : '',
+          serviceId: selectedServiceId || '',
+          tier:  '',
+          price: '',
+          source: 'info-first-capture',
+        }),
+      }).catch(function () { /* best-effort */ });
+
+      close();
+      if (typeof onDone === 'function') onDone();
+    });
+
+    (nameInput.value ? phoneInput : nameInput).focus();
   }
 
   function showBookingSuccess(modal, tier, svcLabel, price) {

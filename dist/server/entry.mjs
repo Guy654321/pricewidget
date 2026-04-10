@@ -1,6 +1,6 @@
 import { renderers } from './renderers.mjs';
 import { c as createExports, s as serverEntrypointModule } from './chunks/_@astrojs-ssr-adapter_uW3YphmJ.mjs';
-import { manifest } from './manifest_8-j_YhwZ.mjs';
+import { manifest } from './manifest_EKpK3ThG.mjs';
 
 const _page0 = () => import('./pages/_image.astro.mjs');
 const _page1 = () => import('./pages/admin.astro.mjs');
@@ -12,8 +12,9 @@ const _page6 = () => import('./pages/api/embed.astro.mjs');
 const _page7 = () => import('./pages/api/notify.astro.mjs');
 const _page8 = () => import('./pages/api/sms.astro.mjs');
 const _page9 = () => import('./pages/api/upload.astro.mjs');
-const _page10 = () => import('./pages/embed-demo.astro.mjs');
-const _page11 = () => import('./pages/index.astro.mjs');
+const _page10 = () => import('./pages/api/widget.js.astro.mjs');
+const _page11 = () => import('./pages/embed-demo.astro.mjs');
+const _page12 = () => import('./pages/index.astro.mjs');
 
 const pageMap = new Map([
     ["node_modules/astro/dist/assets/endpoint/node.js", _page0],
@@ -26,8 +27,9 @@ const pageMap = new Map([
     ["src/pages/api/notify.ts", _page7],
     ["src/pages/api/sms.ts", _page8],
     ["src/pages/api/upload.ts", _page9],
-    ["src/pages/embed-demo.astro", _page10],
-    ["src/pages/index.astro", _page11]
+    ["src/pages/api/widget.js.ts", _page10],
+    ["src/pages/embed-demo.astro", _page11],
+    ["src/pages/index.astro", _page12]
 ]);
 const serverIslandMap = new Map();
 const _manifest = Object.assign(manifest, {

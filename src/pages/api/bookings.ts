@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import fs from 'node:fs';
 import path from 'node:path';
+import { dispatchLeadNotifications } from '../../lib/notifications';
 
 export const prerender = false;
 
@@ -31,10 +32,18 @@ function readBookings(): Booking[] {
   }
 }
 
-function writeBookings(bookings: Booking[]) {
-  const dir = path.dirname(DATA_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(DATA_PATH, JSON.stringify(bookings, null, 2));
+function writeBookings(bookings: Booking[]): boolean {
+  // Vercel's serverless filesystem is read-only at runtime — swallow EROFS
+  // so a failed local write never blocks lead notifications.
+  try {
+    const dir = path.dirname(DATA_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DATA_PATH, JSON.stringify(bookings, null, 2));
+    return true;
+  } catch (err) {
+    console.warn('[bookings] Persist skipped (read-only FS or write error):', err);
+    return false;
+  }
 }
 
 // GET — list all bookings (newest first)
@@ -90,6 +99,23 @@ export const POST: APIRoute = async ({ request }) => {
   const bookings = readBookings();
   bookings.push(booking);
   writeBookings(bookings);
+
+  // Fire owner email + owner SMS + customer confirmation SMS in parallel.
+  // Never block on or fail the booking response if a provider hiccups.
+  try {
+    await dispatchLeadNotifications({
+      name: booking.name,
+      phone: booking.phone,
+      zip: booking.zip,
+      email: booking.email,
+      service: booking.service,
+      tier: booking.tier,
+      price: booking.price,
+      source: booking.source,
+    });
+  } catch (err) {
+    console.error('[bookings] Notification dispatch error:', err);
+  }
 
   return new Response(JSON.stringify({ ok: true, id: booking.id }), {
     status: 201,

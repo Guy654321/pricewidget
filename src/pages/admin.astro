@@ -80,6 +80,7 @@ export const prerender = false;
     }
     .admin-status[data-type="success"] { color: #86efac; }
     .admin-status[data-type="error"] { color: #fca5a5; }
+    .admin-status[data-type="warning"] { color: #fcd34d; }
 
     /* ── Layout ──────────────────────────────────────────────────── */
     .admin-container {
@@ -885,6 +886,27 @@ export const prerender = false;
     var saveBtn   = document.getElementById('admin-save');
     var statusEl  = document.getElementById('admin-status');
     var config    = null;
+    var LOCAL_CONFIG_KEY = 'derby_services_config_v1';
+
+    function readLocalConfig() {
+      try {
+        var raw = window.localStorage.getItem(LOCAL_CONFIG_KEY);
+        if (!raw) return null;
+        var parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.services) || !parsed.contact) return null;
+        return parsed;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function writeLocalConfig(nextConfig) {
+      try {
+        window.localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(nextConfig));
+      } catch (_) {
+        // Ignore storage quota / privacy mode failures.
+      }
+    }
 
     // ── Load config ──────────────────────────────────────────────
     async function loadConfig() {
@@ -892,8 +914,17 @@ export const prerender = false;
         var res = await fetch('/api/config');
         if (!res.ok) throw new Error('HTTP ' + res.status);
         config = await res.json();
+        writeLocalConfig(config);
         renderEditor();
       } catch (err) {
+        var localConfig = readLocalConfig();
+        if (localConfig) {
+          config = localConfig;
+          statusEl.textContent = 'Loaded local saved changes (server unavailable).';
+          statusEl.dataset.type = 'warning';
+          renderEditor();
+          return;
+        }
         loading.textContent = 'Failed to load config: ' + err.message;
       }
     }
@@ -920,11 +951,13 @@ export const prerender = false;
           }
           throw new Error(errMsg);
         }
+        writeLocalConfig(config);
         statusEl.textContent = 'Saved!';
         statusEl.dataset.type = 'success';
       } catch (err) {
-        statusEl.textContent = 'Save failed: ' + err.message;
-        statusEl.dataset.type = 'error';
+        writeLocalConfig(config);
+        statusEl.textContent = 'Saved locally only (server unavailable): ' + err.message;
+        statusEl.dataset.type = 'warning';
       } finally {
         saveBtn.disabled = false;
         setTimeout(function () { statusEl.textContent = ''; }, 3000);

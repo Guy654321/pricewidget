@@ -8,6 +8,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import nodemailer, { type Transporter } from 'nodemailer';
 
 export interface LeadPayload {
   name?: string;
@@ -56,14 +57,29 @@ function formatUsPhone(phone: string): string {
     : phone;
 }
 
+let cachedTransporter: Transporter | null = null;
+function getGmailTransporter(): Transporter | null {
+  if (cachedTransporter) return cachedTransporter;
+  const user = env('GMAIL_USER');
+  const pass = env('GMAIL_APP_PASSWORD');
+  if (!user || !pass) return null;
+  cachedTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+  });
+  return cachedTransporter;
+}
+
 /**
- * Send the owner an HTML email with the lead details via Resend.
+ * Send the owner an HTML email with the lead details via Gmail SMTP.
+ * Requires GMAIL_USER and GMAIL_APP_PASSWORD env vars (Google App Password).
  */
 export async function sendOwnerEmail(lead: LeadPayload): Promise<NotificationResult> {
-  const resendKey = env('RESEND_API_KEY');
+  const transporter = getGmailTransporter();
   const ownerEmail = env('OWNER_EMAIL');
+  const gmailUser = env('GMAIL_USER');
 
-  if (!resendKey || !ownerEmail) {
+  if (!transporter || !ownerEmail) {
     console.log('[notifications] Owner email not configured — skipping.');
     return { ok: true, skipped: true };
   }
@@ -101,32 +117,20 @@ export async function sendOwnerEmail(lead: LeadPayload): Promise<NotificationRes
     </div>
   `;
 
-  const fromAddress = env('LEAD_FROM_EMAIL') || 'Derby Strong Leads <leads@derbystrong.com>';
+  const fromAddress = env('LEAD_FROM_EMAIL') || `Derby Strong Leads <${gmailUser}>`;
+  const subject = `New Lead: ${service}${tier ? ` (${tier})` : ''} — ${name}`;
 
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${resendKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: fromAddress,
-        to: [ownerEmail],
-        subject: `New Lead: ${service} (${tier}) — ${name}`,
-        html: htmlBody,
-      }),
+    await transporter.sendMail({
+      from: fromAddress,
+      to: ownerEmail,
+      subject,
+      html: htmlBody,
+      replyTo: email || undefined,
     });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('[notifications] Resend error:', res.status, errText);
-      return { ok: false, error: 'Email send failed.' };
-    }
-
     return { ok: true };
   } catch (err) {
-    console.error('[notifications] Email fetch error:', err);
+    console.error('[notifications] Gmail send error:', err);
     return { ok: false, error: 'Email service error.' };
   }
 }

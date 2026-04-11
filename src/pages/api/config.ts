@@ -26,6 +26,19 @@ export const PUT: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
 
+    // Ensure config directory exists and is writable
+    const configDir = path.dirname(CONFIG_PATH);
+    fs.mkdirSync(configDir, { recursive: true });
+
+    try {
+      fs.accessSync(configDir, fs.constants.W_OK);
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Config storage is read-only in this environment.' }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Basic validation
     if (!body.services || !Array.isArray(body.services)) {
       return new Response(
@@ -49,8 +62,9 @@ export const PUT: APIRoute = async ({ request }) => {
     );
   } catch (err) {
     console.error('Config write error:', err);
+    const message = err instanceof Error ? err.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: 'Failed to save config.' }),
+      JSON.stringify({ error: `Failed to save config: ${message}` }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

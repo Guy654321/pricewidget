@@ -910,7 +910,16 @@ export const prerender = false;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(config),
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) {
+          var errMsg = 'HTTP ' + res.status;
+          try {
+            var payload = await res.json();
+            if (payload && payload.error) errMsg += ' — ' + payload.error;
+          } catch (_) {
+            // Ignore JSON parse issues and keep status code message
+          }
+          throw new Error(errMsg);
+        }
         statusEl.textContent = 'Saved!';
         statusEl.dataset.type = 'success';
       } catch (err) {

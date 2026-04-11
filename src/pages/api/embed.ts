@@ -51,26 +51,46 @@ export const GET: APIRoute = async ({ url }) => {
       box-shadow: 0 6px 28px rgba(255,183,3,0.55), 0 3px 8px rgba(0,0,0,0.14);
     }
     .ds-embed-trigger svg { flex-shrink: 0; }
+    /* Desktop default: centered, wide panel that comfortably fits 3 tier cards side-by-side */
     .ds-embed-iframe-wrap {
       position: fixed;
-      bottom: 0; right: 0;
-      width: 420px; max-width: 100vw;
-      height: 680px; max-height: 100dvh;
+      top: 50%; left: 50%;
+      width: min(1080px, calc(100vw - 48px));
+      height: min(720px, calc(100dvh - 48px));
       z-index: 9999;
+      transform: translate(-50%, calc(-50% + 16px));
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.22s ease, transform 0.22s ease;
     }
     .ds-embed-iframe-wrap[data-open="true"] {
       opacity: 1;
       pointer-events: auto;
+      transform: translate(-50%, -50%);
     }
     .ds-embed-iframe-wrap iframe {
       width: 100%; height: 100%;
       border: none;
-      border-radius: 16px 16px 0 0;
-      box-shadow: 0 -4px 40px rgba(0,0,0,0.18);
+      border-radius: 18px;
+      box-shadow: 0 24px 64px rgba(10,15,25,0.35), 0 4px 16px rgba(10,15,25,0.18);
       background: #fff;
+      display: block;
+    }
+    /* Tablet: side panel */
+    @media (max-width: 1024px) {
+      .ds-embed-iframe-wrap {
+        top: auto; left: auto;
+        bottom: 0; right: 0;
+        width: 480px;
+        height: min(760px, 100dvh);
+        transform: translateY(24px);
+      }
+      .ds-embed-iframe-wrap[data-open="true"] {
+        transform: translateY(0);
+      }
+      .ds-embed-iframe-wrap iframe {
+        border-radius: 18px 18px 0 0;
+      }
     }
     @media (max-width: 520px) {
       .ds-embed-trigger {
@@ -84,6 +104,10 @@ export const GET: APIRoute = async ({ url }) => {
       .ds-embed-iframe-wrap {
         width: 100vw; height: 100dvh;
         bottom: 0; right: 0;
+        transform: translateY(100%);
+      }
+      .ds-embed-iframe-wrap[data-open="true"] {
+        transform: translateY(0);
       }
       .ds-embed-iframe-wrap iframe {
         border-radius: 0;

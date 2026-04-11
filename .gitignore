@@ -1,0 +1,24 @@
+# Environment variables — NEVER commit
+.env
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+.vercel/
+.vite/
+
+# Runtime data (ephemeral on Vercel, but also shouldn't be in git)
+public/uploads/
+public/config/bookings.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

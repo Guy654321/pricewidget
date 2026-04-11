@@ -447,6 +447,21 @@ const availability = jsonAvailability || { enabled: false };
   var capturedLead  = null; // Stores { name, phone, zip } when info-first flow is used
   var TRUST_SIGNALS = trustSignals;
   var AVAILABILITY  = availability;
+  var LOCAL_CONFIG_KEY = 'derby_services_config_v1';
+
+  try {
+    var localRaw = window.localStorage.getItem(LOCAL_CONFIG_KEY);
+    if (localRaw) {
+      var localConfig = JSON.parse(localRaw);
+      if (localConfig && Array.isArray(localConfig.services)) SERVICES = localConfig.services;
+      if (localConfig && localConfig.contact) CONTACT = localConfig.contact;
+      if (localConfig && localConfig.trustSignals) TRUST_SIGNALS = localConfig.trustSignals;
+      if (localConfig && localConfig.availability) AVAILABILITY = localConfig.availability;
+      if (localConfig && localConfig.priceFlow) PRICE_FLOW = localConfig.priceFlow;
+    }
+  } catch (_) {
+    // Ignore invalid local override data.
+  }
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
   var panel          = document.getElementById('ds-panel');

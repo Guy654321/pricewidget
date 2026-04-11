@@ -72,7 +72,13 @@ const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
 // ─── Route handler ────────────────────────────────────────────────────────────
 export const POST: APIRoute = async ({ request }) => {
-  const apiKey = import.meta.env.GEMINI_API_KEY;
+  // Read from process.env so Vercel's runtime secrets are picked up
+  // (import.meta.env only inlines build-time vars). Accept either name
+  // so the existing PRICEWIDGET_API_KEY env var works without renaming.
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.PRICEWIDGET_API_KEY ||
+    (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.GEMINI_API_KEY;
 
   if (!apiKey) {
     return new Response(

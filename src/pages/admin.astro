@@ -71,6 +71,21 @@ export const prerender = false;
     }
     .admin-save-btn:hover { opacity: 0.85; }
     .admin-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .admin-secondary-btn {
+      background: transparent;
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .admin-secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.55);
+    }
     .admin-status {
       font-size: 13px;
       padding: 8px 0;
@@ -869,6 +884,7 @@ export const prerender = false;
     <span class="badge">Admin</span>
     <div class="admin-topbar-actions">
       <span class="admin-status" id="admin-status"></span>
+      <button class="admin-secondary-btn" id="admin-download" type="button">Download JSON</button>
       <button class="admin-save-btn" id="admin-save" type="button">Save Changes</button>
     </div>
   </div>
@@ -884,6 +900,7 @@ export const prerender = false;
     var root      = document.getElementById('admin-root');
     var loading   = document.getElementById('admin-loading');
     var saveBtn   = document.getElementById('admin-save');
+    var downloadBtn = document.getElementById('admin-download');
     var statusEl  = document.getElementById('admin-status');
     var config    = null;
     var LOCAL_CONFIG_KEY = 'derby_services_config_v1';
@@ -906,6 +923,18 @@ export const prerender = false;
       } catch (_) {
         // Ignore storage quota / privacy mode failures.
       }
+    }
+
+    function downloadConfigSnapshot(fileName) {
+      var blob = new Blob([JSON.stringify(config, null, 2) + '\n'], { type: 'application/json' });
+      var url = window.URL.createObjectURL(blob);
+      var anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
     }
 
     // ── Load config ──────────────────────────────────────────────
@@ -956,7 +985,8 @@ export const prerender = false;
         statusEl.dataset.type = 'success';
       } catch (err) {
         writeLocalConfig(config);
-        statusEl.textContent = 'Saved locally only (server unavailable): ' + err.message;
+        downloadConfigSnapshot('services.json');
+        statusEl.textContent = 'Saved locally + downloaded services.json (server unavailable): ' + err.message;
         statusEl.dataset.type = 'warning';
       } finally {
         saveBtn.disabled = false;
@@ -964,6 +994,16 @@ export const prerender = false;
       }
     }
     saveBtn.addEventListener('click', saveConfig);
+
+    function downloadCurrentConfig() {
+      if (!config) return;
+      readFormIntoConfig();
+      downloadConfigSnapshot('services.json');
+      statusEl.textContent = 'Downloaded services.json (copy into public/config/services.json).';
+      statusEl.dataset.type = 'success';
+      setTimeout(function () { statusEl.textContent = ''; }, 3500);
+    }
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadCurrentConfig);
 
     // ── Read form values back into config ────────────────────────
     function readFormIntoConfig() {

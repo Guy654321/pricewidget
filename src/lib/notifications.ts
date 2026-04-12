@@ -6,9 +6,8 @@
  * pipeline never breaks because of a transient email/SMS provider issue.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
 import nodemailer, { type Transporter } from 'nodemailer';
+import { getJSON } from './storage';
 
 export interface LeadPayload {
   name?: string;
@@ -213,9 +212,7 @@ export async function sendCustomerSms(lead: LeadPayload): Promise<NotificationRe
 
   let template = '';
   try {
-    const cfgPath = path.join(process.cwd(), 'public/config/services.json');
-    const raw = fs.readFileSync(cfgPath, 'utf-8');
-    const cfg = JSON.parse(raw);
+    const cfg = await getJSON<{ smsTemplate?: string }>('services');
     if (cfg && typeof cfg.smsTemplate === 'string') template = cfg.smsTemplate;
   } catch {
     /* fall through to default */

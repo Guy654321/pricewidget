@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { getJSON } from '../../lib/storage';
 
 export const prerender = false;
 
@@ -54,14 +55,10 @@ When you have enough information to route (70%+ confidence), end your message wi
 [ROUTE:tuneup]
 [ROUTE:rep]`;
 
-function getSystemPrompt(): string {
+async function getSystemPrompt(): Promise<string> {
   try {
-    const fs = require('node:fs');
-    const path = require('node:path');
-    const cfgPath = path.join(process.cwd(), 'public/config/chat.json');
-    const raw = fs.readFileSync(cfgPath, 'utf-8');
-    const chatCfg = JSON.parse(raw);
-    if (chatCfg.systemPrompt && chatCfg.systemPrompt.trim()) {
+    const chatCfg = await getJSON<{ systemPrompt?: string }>('chat');
+    if (chatCfg?.systemPrompt && chatCfg.systemPrompt.trim()) {
       return chatCfg.systemPrompt;
     }
   } catch { /* No custom config — use default */ }
@@ -145,6 +142,8 @@ export const POST: APIRoute = async ({ request }) => {
   // Gemini API endpoint with streaming
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`;
 
+  const systemPrompt = await getSystemPrompt();
+
   let geminiRes: Response;
   try {
     geminiRes = await fetch(url, {
@@ -152,7 +151,7 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         system_instruction: {
-          parts: [{ text: getSystemPrompt() }],
+          parts: [{ text: systemPrompt }],
         },
         contents: geminiContents,
         generationConfig: {

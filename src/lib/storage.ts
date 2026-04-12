@@ -26,25 +26,32 @@ function pickEnv(...keys: string[]): string | undefined {
   return undefined;
 }
 
-const KV_URL = pickEnv(
+const URL_VARS = [
   'KV_REST_API_URL',
   'UPSTASH_REDIS_REST_URL',
-  'KV_URL',                    // Vercel KV sometimes uses this
-  'REDIS_URL',                 // generic fallback
-);
-const KV_TOKEN = pickEnv(
+  'KV_URL',
+  'REDIS_URL',
+  // Vercel KV stores sometimes prefix everything with KV_STORAGE_
+  'KV_STORAGE_KV_REST_API_URL',
+  'KV_STORAGE_KV_URL',
+  'KV_STORAGE_REDIS_URL',
+];
+const TOKEN_VARS = [
   'KV_REST_API_TOKEN',
   'UPSTASH_REDIS_REST_TOKEN',
-  'KV_REST_API_READ_ONLY_TOKEN',  // read-only still lets us detect KV
+  'KV_REST_API_READ_ONLY_TOKEN',
   'REDIS_TOKEN',
-);
+  'KV_STORAGE_KV_REST_API_TOKEN',
+  'KV_STORAGE_KV_REST_API_READ_ONLY_TOKEN',
+];
+
+const KV_URL = pickEnv(...URL_VARS);
+const KV_TOKEN = pickEnv(...TOKEN_VARS);
 
 export const isKvEnabled = Boolean(KV_URL && KV_TOKEN);
 export const kvDebugInfo = {
-  urlVar: ['KV_REST_API_URL', 'UPSTASH_REDIS_REST_URL', 'KV_URL', 'REDIS_URL']
-    .find((k) => Boolean(process.env[k])) || null,
-  tokenVar: ['KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_TOKEN', 'KV_REST_API_READ_ONLY_TOKEN', 'REDIS_TOKEN']
-    .find((k) => Boolean(process.env[k])) || null,
+  urlVar: URL_VARS.find((k) => Boolean(process.env[k])) || null,
+  tokenVar: TOKEN_VARS.find((k) => Boolean(process.env[k])) || null,
 };
 
 async function kvCommand<T = unknown>(command: (string | number)[]): Promise<T | null> {

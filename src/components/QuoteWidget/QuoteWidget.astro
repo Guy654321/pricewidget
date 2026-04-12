@@ -1528,11 +1528,17 @@ const availability = jsonAvailability || { enabled: false };
       });
       messages.push({ role: 'user', content: content });
       appendUserBubbleWithImages(userText, pendingImages);
+      trackEvent('chat_message_sent', {
+        role: 'user',
+        message: userText || '(image)',
+        photoCount: pendingImages.length,
+      });
       pendingImages = [];
       renderPendingImages();
     } else {
       messages.push({ role: 'user', content: userText });
       appendUserBubble(userText);
+      trackEvent('chat_message_sent', { role: 'user', message: userText });
     }
 
     setChatDisabled(true);
@@ -1587,6 +1593,7 @@ const availability = jsonAvailability || { enabled: false };
       bubble.textContent = cleanText;
       messages.push({ role: 'assistant', content: cleanText });
       fireGtm('chat_message_received');
+      trackEvent('chat_message_sent', { role: 'assistant', message: cleanText });
 
       if (routeMatch) {
         var routeKey = routeMatch[1];
@@ -1678,11 +1685,65 @@ const availability = jsonAvailability || { enabled: false };
     }
   });
 
-  // ── GTM ──────────────────────────────────────────────────────────────────────
+  // ── Analytics session id (per browser tab/session) ───────────────────────────
+  var ANALYTICS_SESSION_KEY = 'ds_analytics_session';
+  function getAnalyticsSession() {
+    try {
+      var s = sessionStorage.getItem(ANALYTICS_SESSION_KEY);
+      if (!s) {
+        s = 's_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+        sessionStorage.setItem(ANALYTICS_SESSION_KEY, s);
+      }
+      return s;
+    } catch (_) { return 's_anon'; }
+  }
+
+  // POST analytics event to /api/analytics. Uses sendBeacon when possible
+  // so unload events (drop-off) survive the page navigation. Fire-and-forget.
+  function trackEvent(type, data) {
+    try {
+      var payload = Object.assign({
+        type: type,
+        sessionId: getAnalyticsSession(),
+        screen: currentScreen,
+        serviceId: selectedServiceId || undefined,
+      }, data || {});
+      var body = JSON.stringify(payload);
+      var url = '/api/analytics';
+      if (navigator.sendBeacon) {
+        var blob = new Blob([body], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+      } else {
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: body,
+          keepalive: true,
+        }).catch(function () { /* swallow */ });
+      }
+    } catch (_) { /* never break the widget on analytics */ }
+  }
+
+  // ── GTM + analytics ──────────────────────────────────────────────────────────
   function fireGtm(event, data) {
     if (typeof window !== 'undefined' && Array.isArray(window.dataLayer)) {
       window.dataLayer.push(Object.assign({ event: 'ds_' + event }, data || {}));
     }
+    // Mirror every GTM event to the durable analytics store so we can see
+    // funnels, drop-offs, and per-session journeys in the admin dashboard.
+    trackEvent(event, data);
+  }
+
+  // Drop-off / abandonment beacon
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', function () {
+      trackEvent('drop_off', { lastScreen: currentScreen });
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') {
+        trackEvent('visibility_hidden', { lastScreen: currentScreen });
+      }
+    });
   }
 
   // ── XSS helpers ──────────────────────────────────────────────────────────────

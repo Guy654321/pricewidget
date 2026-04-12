@@ -1892,6 +1892,7 @@ export const prerender = false;
 
     // ── Leads management ─────────────────────────────────────────
     var allBookings = [];
+    var allEvents = [];
 
     function loadLeads() {
       fetch('/api/bookings')
@@ -1904,6 +1905,14 @@ export const prerender = false;
         .catch(function () {
           document.getElementById('leads-table-wrap').innerHTML = '<p class="admin-leads-empty">Failed to load leads.</p>';
         });
+      // Pull analytics events in parallel — failures here don't block the leads view.
+      fetch('/api/analytics')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          allEvents = Array.isArray(data) ? data : [];
+          renderAnalytics();
+        })
+        .catch(function () { /* analytics is optional */ });
     }
 
     function getFilteredBookings() {
@@ -2085,8 +2094,8 @@ export const prerender = false;
     function renderAnalytics() {
       var el = document.getElementById('analytics-content');
       if (!el) return;
-      if (allBookings.length === 0) {
-        el.innerHTML = '<div class="admin-leads-empty">No leads yet. Analytics will appear once bookings start coming in.</div>';
+      if (allBookings.length === 0 && allEvents.length === 0) {
+        el.innerHTML = '<div class="admin-leads-empty">No data yet. Analytics will appear once visitors start using the widget.</div>';
         return;
       }
 
@@ -2151,7 +2160,199 @@ export const prerender = false;
       html += renderBarChart(byStatus, ['blue', 'amber', 'purple', 'green', 'red']);
       html += '</div>';
 
+      // ── Widget engagement (events) ────────────────────────────
+      if (allEvents.length > 0) {
+        html += renderEngagementSection();
+      }
+
       el.innerHTML = html;
+      wireSessionDrilldown();
+    }
+
+    function renderEngagementSection() {
+      // Group events by session
+      var sessions = {};
+      allEvents.forEach(function (e) {
+        if (!e.sessionId) return;
+        if (!sessions[e.sessionId]) sessions[e.sessionId] = [];
+        sessions[e.sessionId].push(e);
+      });
+      var sessionIds = Object.keys(sessions);
+
+      // Funnel: count sessions that hit each milestone
+      var funnel = {
+        widget_opened: 0,
+        service: 0,
+        questions: 0,
+        tiers: 0,
+        booking: 0,
+      };
+      sessionIds.forEach(function (sid) {
+        var evs = sessions[sid];
+        var hit = { widget_opened: false, service: false, questions: false, tiers: false, booking: false };
+        evs.forEach(function (e) {
+          if (e.type === 'widget_opened') hit.widget_opened = true;
+          if (e.screen === 'service' || e.type === 'quote_path_selected') hit.service = true;
+          if (e.screen === 'questions' || e.type === 'service_selected') hit.questions = true;
+          if (e.screen === 'tiers' || e.type === 'tier_viewed') hit.tiers = true;
+          if (e.type === 'booking_submitted' || e.type === 'tier_booked') hit.booking = true;
+        });
+        if (hit.widget_opened) funnel.widget_opened++;
+        if (hit.service) funnel.service++;
+        if (hit.questions) funnel.questions++;
+        if (hit.tiers) funnel.tiers++;
+        if (hit.booking) funnel.booking++;
+      });
+
+      // Most-clicked event types
+      var typeCounts = {};
+      allEvents.forEach(function (e) {
+        typeCounts[e.type] = (typeCounts[e.type] || 0) + 1;
+      });
+
+      // Drop-off screen distribution
+      var dropOffs = {};
+      allEvents.forEach(function (e) {
+        if (e.type === 'drop_off' && e.lastScreen) {
+          dropOffs[e.lastScreen] = (dropOffs[e.lastScreen] || 0) + 1;
+        }
+      });
+
+      // Chat sessions (anything with at least one chat_message_sent)
+      var chatSessions = sessionIds.filter(function (sid) {
+        return sessions[sid].some(function (e) { return e.type === 'chat_message_sent'; });
+      });
+      // Photo uploads
+      var photoSessions = sessionIds.filter(function (sid) {
+        return sessions[sid].some(function (e) { return (e.photoCount || 0) > 0; });
+      });
+
+      var html = '';
+
+      // Engagement summary
+      html += '<div class="analytics-section"><h3>Widget Engagement</h3>';
+      html += '<div class="analytics-grid">' +
+        analyticsCard(sessionIds.length, 'Total Sessions') +
+        analyticsCard(funnel.widget_opened, 'Widget Opens') +
+        analyticsCard(chatSessions.length, 'Chat Sessions') +
+        analyticsCard(photoSessions.length, 'Photo Uploads') +
+      '</div>';
+      html += '</div>';
+
+      // Funnel
+      html += '<div class="analytics-section"><h3>Conversion Funnel</h3>';
+      var funnelData = {
+        '1. Opened widget': funnel.widget_opened,
+        '2. Picked a service': funnel.service,
+        '3. Answered questions': funnel.questions,
+        '4. Viewed pricing': funnel.tiers,
+        '5. Submitted booking': funnel.booking,
+      };
+      html += renderBarChart(funnelData, ['blue', 'teal', 'amber', 'purple', 'green']);
+      html += '</div>';
+
+      // Drop-off screens
+      if (Object.keys(dropOffs).length > 0) {
+        html += '<div class="analytics-section"><h3>Drop-off Screens</h3>';
+        html += renderBarChart(dropOffs, ['red', 'amber', 'purple', 'blue']);
+        html += '</div>';
+      }
+
+      // Most-fired events
+      html += '<div class="analytics-section"><h3>Top Events</h3>';
+      var topTypes = {};
+      Object.entries(typeCounts).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 10).forEach(function (e) {
+        topTypes[e[0]] = e[1];
+      });
+      html += renderBarChart(topTypes, ['teal', 'blue', 'amber', 'purple', 'green', 'red']);
+      html += '</div>';
+
+      // Recent sessions list
+      var recent = sessionIds.map(function (sid) {
+        var evs = sessions[sid];
+        evs.sort(function (a, b) { return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(); });
+        return {
+          id: sid,
+          start: evs[0].timestamp,
+          end: evs[evs.length - 1].timestamp,
+          events: evs,
+          eventCount: evs.length,
+          chatCount: evs.filter(function (e) { return e.type === 'chat_message_sent'; }).length,
+          photoCount: evs.reduce(function (sum, e) { return sum + (e.photoCount || 0); }, 0),
+          booked: evs.some(function (e) { return e.type === 'booking_submitted' || e.type === 'tier_booked'; }),
+          lastScreen: evs[evs.length - 1].screen || '—',
+        };
+      }).sort(function (a, b) { return new Date(b.start).getTime() - new Date(a.start).getTime(); }).slice(0, 25);
+
+      html += '<div class="analytics-section"><h3>Recent Sessions</h3>';
+      html += '<table class="admin-leads-table"><thead><tr>' +
+        '<th>Started</th><th>Last Screen</th><th>Events</th><th>Chat Msgs</th><th>Photos</th><th>Booked?</th><th></th>' +
+      '</tr></thead><tbody>';
+      recent.forEach(function (s) {
+        html += '<tr>' +
+          '<td>' + esc(new Date(s.start).toLocaleString()) + '</td>' +
+          '<td>' + esc(s.lastScreen) + '</td>' +
+          '<td>' + s.eventCount + '</td>' +
+          '<td>' + s.chatCount + '</td>' +
+          '<td>' + s.photoCount + '</td>' +
+          '<td>' + (s.booked ? '<span style="color:#059669;font-weight:600;">Yes</span>' : '<span style="color:#94a3b8;">No</span>') + '</td>' +
+          '<td><button class="admin-link-btn" data-session-id="' + esc(s.id) + '">View</button></td>' +
+        '</tr>';
+      });
+      html += '</tbody></table></div>';
+
+      // Drilldown panel
+      html += '<div id="session-drilldown" class="analytics-section" style="display:none;"></div>';
+
+      return html;
+    }
+
+    function wireSessionDrilldown() {
+      var btns = document.querySelectorAll('[data-session-id]');
+      btns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sid = btn.getAttribute('data-session-id');
+          renderSessionDrilldown(sid);
+        });
+      });
+    }
+
+    function renderSessionDrilldown(sessionId) {
+      var panel = document.getElementById('session-drilldown');
+      if (!panel) return;
+      var evs = allEvents.filter(function (e) { return e.sessionId === sessionId; });
+      evs.sort(function (a, b) { return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(); });
+      if (evs.length === 0) {
+        panel.style.display = 'none';
+        return;
+      }
+      var html = '<h3>Session ' + esc(sessionId) + '</h3>';
+      html += '<div style="font-size:12px;color:#64748b;margin-bottom:12px;">' +
+        evs.length + ' events &middot; ' +
+        new Date(evs[0].timestamp).toLocaleString() + ' → ' +
+        new Date(evs[evs.length - 1].timestamp).toLocaleString() +
+      '</div>';
+      html += '<table class="admin-leads-table"><thead><tr>' +
+        '<th>Time</th><th>Type</th><th>Screen</th><th>Detail</th>' +
+      '</tr></thead><tbody>';
+      evs.forEach(function (e) {
+        var detail = '';
+        if (e.role && e.message) detail = '<strong>' + esc(e.role) + ':</strong> ' + esc(e.message);
+        else if (e.serviceId) detail = 'service: ' + esc(e.serviceId);
+        else if (e.tier) detail = 'tier: ' + esc(e.tier);
+        else if (e.lastScreen) detail = 'last: ' + esc(e.lastScreen);
+        else if (e.route) detail = 'route: ' + esc(e.route);
+        html += '<tr>' +
+          '<td style="font-size:11px;white-space:nowrap;">' + esc(new Date(e.timestamp).toLocaleTimeString()) + '</td>' +
+          '<td><code>' + esc(e.type) + '</code></td>' +
+          '<td>' + esc(e.screen || '—') + '</td>' +
+          '<td>' + detail + '</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table>';
+      panel.innerHTML = html;
+      panel.style.display = 'block';
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function analyticsCard(value, label) {

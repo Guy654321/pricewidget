@@ -1,41 +1,38 @@
 import type { APIRoute } from 'astro';
-import fs from 'node:fs';
-import path from 'node:path';
+import { getJSON, setJSON, isKvEnabled } from '../../lib/storage';
 
 export const prerender = false;
 
-const CONFIG_PATH = path.join(process.cwd(), 'public/config/chat.json');
+const STORAGE_KEY = 'chat';
+const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
 export const GET: APIRoute = async () => {
-  try {
-    const raw = fs.readFileSync(CONFIG_PATH, 'utf-8');
-    return new Response(raw, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch {
-    // Return defaults if no config file exists
-    return new Response(JSON.stringify({ systemPrompt: '' }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const cfg = (await getJSON<{ systemPrompt?: string }>(STORAGE_KEY)) || { systemPrompt: '' };
+  return new Response(JSON.stringify(cfg), { status: 200, headers: JSON_HEADERS });
 };
 
 export const PUT: APIRoute = async ({ request }) => {
+  let body: unknown;
   try {
-    const body = await request.json();
-    const dir = path.dirname(CONFIG_PATH);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(body, null, 2));
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON.' }), {
+      status: 400,
+      headers: JSON_HEADERS,
     });
   }
+
+  const ok = await setJSON(STORAGE_KEY, body);
+  if (!ok) {
+    return new Response(
+      JSON.stringify({
+        error: isKvEnabled
+          ? 'KV write failed — check KV_REST_API_URL/TOKEN.'
+          : 'Chat config storage is read-only in this environment. Attach Vercel KV to enable saves.',
+      }),
+      { status: 503, headers: JSON_HEADERS }
+    );
+  }
+
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers: JSON_HEADERS });
 };

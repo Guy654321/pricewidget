@@ -1,11 +1,10 @@
 import type { APIRoute } from 'astro';
-import fs from 'node:fs';
-import path from 'node:path';
 import { dispatchLeadNotifications } from '../../lib/notifications';
+import { getList, setJSON, appendToList } from '../../lib/storage';
 
 export const prerender = false;
 
-const DATA_PATH = path.join(process.cwd(), 'public/config/bookings.json');
+const STORAGE_KEY = 'bookings';
 
 interface Booking {
   id: string;
@@ -23,41 +22,16 @@ interface Booking {
   notes: string;
 }
 
-function readBookings(): Booking[] {
-  try {
-    const raw = fs.readFileSync(DATA_PATH, 'utf-8');
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-function writeBookings(bookings: Booking[]): boolean {
-  // Vercel's serverless filesystem is read-only at runtime — swallow EROFS
-  // so a failed local write never blocks lead notifications.
-  try {
-    const dir = path.dirname(DATA_PATH);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(DATA_PATH, JSON.stringify(bookings, null, 2));
-    return true;
-  } catch (err) {
-    console.warn('[bookings] Persist skipped (read-only FS or write error):', err);
-    return false;
-  }
-}
+const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
 // GET — list all bookings (newest first)
 export const GET: APIRoute = async ({ url }) => {
-  const bookings = readBookings();
+  const bookings = await getList<Booking>(STORAGE_KEY);
   const status = url.searchParams.get('status');
-  const filtered = status ? bookings.filter(b => b.status === status) : bookings;
-  // newest first
+  const filtered = status ? bookings.filter((b) => b.status === status) : bookings;
   filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  return new Response(JSON.stringify(filtered), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return new Response(JSON.stringify(filtered), { status: 200, headers: JSON_HEADERS });
 };
 
 // POST — create new booking (from widget)
@@ -68,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -76,7 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (phone.length < 10) {
     return new Response(JSON.stringify({ error: 'Phone required' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -96,12 +70,10 @@ export const POST: APIRoute = async ({ request }) => {
     notes: '',
   };
 
-  const bookings = readBookings();
-  bookings.push(booking);
-  writeBookings(bookings);
+  await appendToList(STORAGE_KEY, booking);
 
   // Fire owner email + owner SMS + customer confirmation SMS in parallel.
-  // Never block on or fail the booking response if a provider hiccups.
+  // Never block or fail the booking response if a provider hiccups.
   try {
     await dispatchLeadNotifications({
       name: booking.name,
@@ -119,7 +91,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   return new Response(JSON.stringify({ ok: true, id: booking.id }), {
     status: 201,
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
   });
 };
 
@@ -131,7 +103,7 @@ export const PATCH: APIRoute = async ({ request }) => {
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -139,26 +111,23 @@ export const PATCH: APIRoute = async ({ request }) => {
   if (!id) {
     return new Response(JSON.stringify({ error: 'id required' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
-  const bookings = readBookings();
-  const idx = bookings.findIndex(b => b.id === id);
+  const bookings = await getList<Booking>(STORAGE_KEY);
+  const idx = bookings.findIndex((b) => b.id === id);
   if (idx === -1) {
     return new Response(JSON.stringify({ error: 'Not found' }), {
       status: 404,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
   if (body.status !== undefined) bookings[idx].status = String(body.status);
   if (body.notes !== undefined) bookings[idx].notes = String(body.notes);
 
-  writeBookings(bookings);
+  await setJSON(STORAGE_KEY, bookings);
 
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers: JSON_HEADERS });
 };

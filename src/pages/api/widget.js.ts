@@ -71,7 +71,7 @@ export const GET: APIRoute = async ({ url }) => {
     wrap.setAttribute("aria-label", "Instant Quote");
 
     iframe = document.createElement("iframe");
-    iframe.src = BASE + "/embed?embed=1";
+    iframe.src = BASE + "/?embed=1";
     iframe.setAttribute("loading", "lazy");
     iframe.setAttribute("title", "Derby Strong Instant Quote");
     iframe.setAttribute("allow", "camera; clipboard-write");

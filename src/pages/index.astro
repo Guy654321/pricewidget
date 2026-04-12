@@ -4,14 +4,25 @@ import Layout from '../layouts/Layout.astro';
 import QuoteWidget from '../components/QuoteWidget/QuoteWidget.astro';
 ---
 <Layout title="Derby Strong — Widget Test">
-  <h1>Derby Strong Quote Widget</h1>
-  <p>
+  <h1 data-test-content>Derby Strong Quote Widget</h1>
+  <p data-test-content>
     The amber "Instant Quote" button is pinned to the bottom-right corner.
     On mobile it becomes a compact floating pill in the bottom-right corner.
   </p>
-  <p style="margin-top:1rem;">
+  <p data-test-content style="margin-top:1rem;">
     <strong>Test flows:</strong> Try "I know my issue" → pick a service → answer the question → see pricing.
     Or try the AI chat to describe a problem and let it route you automatically.
   </p>
   <QuoteWidget />
 </Layout>
+<script is:inline>
+  // When loaded as an iframe embed, hide test page text and set clean background
+  if (new URLSearchParams(window.location.search).get('embed') === '1') {
+    document.documentElement.style.background = '#fff';
+    document.body.style.background = '#fff';
+    document.body.style.overflow = 'hidden';
+    var page = document.querySelector('.page');
+    if (page) { page.style.padding = '0'; page.style.margin = '0'; page.style.maxWidth = 'none'; }
+    document.querySelectorAll('[data-test-content]').forEach(function(el) { el.style.display = 'none'; });
+  }
+</script>

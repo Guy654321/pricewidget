@@ -1806,15 +1806,17 @@ const availability = jsonAvailability || { enabled: false };
     if (nudge) nudge.style.display = 'none';
     // Auto-open panel
     openPanel();
-    // Override close to message parent
+    // Override close to message parent FIRST, then close panel
     var origClose = closePanel;
     closePanel = function () {
-      origClose();
+      // Send close message to parent immediately so overlay hides
+      // before the panel animation reveals the white background
       if (window.parent !== window) {
         window.parent.postMessage('ds-widget-close', '*');
       }
+      origClose();
     };
-    // Panel should be full-size in embed mode
+    // Panel should be full-size in embed mode, covering all page content
     panel.style.position = 'fixed';
     panel.style.bottom = '0';
     panel.style.right = '0';
@@ -1823,6 +1825,10 @@ const availability = jsonAvailability || { enabled: false };
     panel.style.width = '100%';
     panel.style.maxHeight = '100%';
     panel.style.borderRadius = '0';
+    panel.style.zIndex = '99999';
+    panel.style.transform = 'none';
+    panel.style.opacity = '1';
+    panel.style.pointerEvents = 'auto';
   }
 
 })();

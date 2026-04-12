@@ -8,6 +8,17 @@ const IMAGES_DIR = path.join(process.cwd(), 'public/images');
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
+// Vercel Blob token — injected when a Blob store is attached to the project.
+// Falls back to filesystem when missing (local dev).
+function pickBlobToken(): string | undefined {
+  return (
+    process.env.BLOB_READ_WRITE_TOKEN ||
+    process.env.KV_STORAGE_BLOB_READ_WRITE_TOKEN ||
+    process.env.VERCEL_BLOB_READ_WRITE_TOKEN ||
+    undefined
+  );
+}
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     const formData = await request.formData();
@@ -34,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Sanitize filename: keep only safe chars
+    // Sanitize filename
     const ext = path.extname(file.name).toLowerCase() || '.jpg';
     const base = file.name
       .replace(/\.[^.]+$/, '')
@@ -42,19 +53,34 @@ export const POST: APIRoute = async ({ request }) => {
       .slice(0, 60);
     const timestamp = Date.now();
     const filename = `${base}-${timestamp}${ext}`;
-    const filePath = path.join(IMAGES_DIR, filename);
 
-    // Ensure images directory exists
+    const blobToken = pickBlobToken();
+
+    if (blobToken) {
+      // ── Vercel Blob (production) ──────────────────────────────
+      const { put } = await import('@vercel/blob');
+      const blob = await put(`images/${filename}`, file, {
+        access: 'public',
+        token: blobToken,
+        addRandomSuffix: false,
+      });
+
+      return new Response(
+        JSON.stringify({ ok: true, path: blob.url, storage: 'blob' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ── Filesystem fallback (local dev) ───────────────────────────
+    const filePath = path.join(IMAGES_DIR, filename);
     if (!fs.existsSync(IMAGES_DIR)) {
       fs.mkdirSync(IMAGES_DIR, { recursive: true });
     }
-
-    // Write file
     const buffer = Buffer.from(await file.arrayBuffer());
     fs.writeFileSync(filePath, buffer);
 
     return new Response(
-      JSON.stringify({ ok: true, path: `/images/${filename}` }),
+      JSON.stringify({ ok: true, path: `/images/${filename}`, storage: 'filesystem' }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err) {

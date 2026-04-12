@@ -764,6 +764,293 @@ export const prerender = false;
       color: var(--ink);
       flex-shrink: 0;
     }
+    /* ── Polished analytics layout ───────────────────────────────── */
+    .analytics-page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .analytics-page-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: 0 0 4px 0;
+      letter-spacing: -0.01em;
+    }
+    .analytics-page-header p {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0;
+    }
+    .analytics-page-header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .analytics-refresh-btn {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .analytics-refresh-btn:hover { background: var(--muted); }
+    .analytics-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .analytics-kpi {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .analytics-kpi::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: var(--accent-color, var(--primary));
+    }
+    .analytics-kpi-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+    .analytics-kpi-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .analytics-kpi-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    .analytics-kpi[data-tone="primary"] { --accent-color: #0F3D3E; }
+    .analytics-kpi[data-tone="blue"] { --accent-color: #3b82f6; }
+    .analytics-kpi[data-tone="amber"] { --accent-color: #f59e0b; }
+    .analytics-kpi[data-tone="green"] { --accent-color: #22c55e; }
+    .analytics-kpi[data-tone="purple"] { --accent-color: #8b5cf6; }
+    .analytics-kpi[data-tone="red"] { --accent-color: #ef4444; }
+
+    .analytics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 900px) { .analytics-row { grid-template-columns: 1fr; } }
+
+    .analytics-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .analytics-section h3 .count-pill {
+      background: var(--muted);
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    /* Funnel */
+    .analytics-funnel-step {
+      display: grid;
+      grid-template-columns: 32px 1fr 60px;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .analytics-funnel-num {
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .analytics-funnel-bar {
+      position: relative;
+      height: 30px;
+      background: var(--muted);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .analytics-funnel-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0F3D3E 0%, #14b8a6 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding-left: 12px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      transition: width 0.6s ease;
+    }
+    .analytics-funnel-count {
+      font-weight: 700;
+      color: var(--ink);
+      text-align: right;
+      font-size: 14px;
+    }
+    .analytics-funnel-rate {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Sessions table */
+    .analytics-sessions-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .analytics-sessions-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .analytics-sessions-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .analytics-sessions-table tr:hover td { background: var(--muted); }
+    .analytics-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .analytics-badge[data-tone="green"] { background: #dcfce7; color: #166534; }
+    .analytics-badge[data-tone="gray"] { background: #f1f5f9; color: #64748b; }
+
+    /* Empty state */
+    .analytics-empty {
+      background: #fff;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 60px 20px;
+      text-align: center;
+      color: #64748b;
+    }
+    .analytics-empty svg {
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+    .analytics-empty h3 {
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .analytics-empty p {
+      font-size: 13px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* Drilldown */
+    #session-drilldown {
+      border-left: 4px solid var(--primary);
+    }
+    .session-event-row {
+      display: grid;
+      grid-template-columns: 80px 180px 1fr;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+      font-size: 12px;
+    }
+    .session-event-row:last-child { border-bottom: 0; }
+    .session-event-time {
+      color: #94a3b8;
+      font-variant-numeric: tabular-nums;
+    }
+    .session-event-type {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      background: var(--muted);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #475569;
+      width: fit-content;
+    }
+    .session-event-detail {
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .session-event-detail strong { color: #0F3D3E; }
+    .session-chat-bubble {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 10px;
+      max-width: 100%;
+    }
+    .session-chat-bubble[data-role="user"] {
+      background: #DBEAFE;
+      color: #1e3a8a;
+    }
+    .session-chat-bubble[data-role="assistant"] {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    /* Storage status banner */
+    .admin-storage-banner {
+      background: #FEF3C7;
+      border-bottom: 1px solid #FCD34D;
+      color: #78350F;
+      padding: 12px 24px;
+      font-size: 13px;
+    }
+    .admin-storage-banner-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-storage-banner svg { color: #B45309; flex-shrink: 0; }
+    .admin-storage-banner a {
+      color: #78350F;
+      text-decoration: underline;
+      font-weight: 700;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
 
     /* ── Trust/availability admin ─────────────────────────────────── */
     .admin-settings-card {
@@ -886,6 +1173,22 @@ export const prerender = false;
       <span class="admin-status" id="admin-status"></span>
       <button class="admin-secondary-btn" id="admin-download" type="button">Download JSON</button>
       <button class="admin-save-btn" id="admin-save" type="button">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Storage status banner (only shown if KV isn't attached) -->
+  <div id="admin-storage-banner" class="admin-storage-banner" style="display:none;">
+    <div class="admin-storage-banner-inner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <div>
+        <strong>Storage not connected.</strong>
+        <span id="admin-storage-banner-text">Bookings, admin saves, and analytics events are not persisting.</span>
+        <a href="https://vercel.com/docs/storage/vercel-kv" target="_blank" rel="noopener">How to fix &rarr;</a>
+      </div>
     </div>
   </div>
 
@@ -2094,83 +2397,29 @@ export const prerender = false;
     function renderAnalytics() {
       var el = document.getElementById('analytics-content');
       if (!el) return;
+
+      // Always render header so refresh button works
+      var html = renderAnalyticsHeader();
+
       if (allBookings.length === 0 && allEvents.length === 0) {
-        el.innerHTML = '<div class="admin-leads-empty">No data yet. Analytics will appear once visitors start using the widget.</div>';
+        html += '<div class="analytics-empty">' +
+          '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M3 3v18h18"/>' +
+            '<path d="M7 14l4-4 4 4 5-5"/>' +
+          '</svg>' +
+          '<h3>No data yet</h3>' +
+          '<p>As soon as a visitor opens the widget or submits a quote, sessions, conversion funnels, and chat transcripts will show up here.</p>' +
+        '</div>';
+        el.innerHTML = html;
+        wireAnalyticsControls();
         return;
       }
 
+      // Pre-compute everything
       var now = new Date();
       var weekAgo = new Date(now.getTime() - 7 * 86400000);
-      var monthAgo = new Date(now.getTime() - 30 * 86400000);
-
       var thisWeek = allBookings.filter(function (b) { return new Date(b.timestamp) >= weekAgo; });
-      var thisMonth = allBookings.filter(function (b) { return new Date(b.timestamp) >= monthAgo; });
 
-      // By service
-      var byService = {};
-      allBookings.forEach(function (b) {
-        byService[b.service] = (byService[b.service] || 0) + 1;
-      });
-
-      // By tier
-      var byTier = {};
-      allBookings.forEach(function (b) {
-        if (b.tier) byTier[b.tier] = (byTier[b.tier] || 0) + 1;
-      });
-
-      // By source
-      var bySource = {};
-      allBookings.forEach(function (b) {
-        bySource[b.source || 'quote'] = (bySource[b.source || 'quote'] || 0) + 1;
-      });
-
-      // By status
-      var byStatus = {};
-      allBookings.forEach(function (b) {
-        byStatus[b.status || 'new'] = (byStatus[b.status || 'new'] || 0) + 1;
-      });
-
-      var html = '';
-
-      // Summary cards
-      html += '<div class="analytics-grid">' +
-        analyticsCard(allBookings.length, 'Total Leads') +
-        analyticsCard(thisWeek.length, 'This Week') +
-        analyticsCard(thisMonth.length, 'Last 30 Days') +
-        analyticsCard(byStatus['new'] || 0, 'New / Uncontacted') +
-      '</div>';
-
-      // By service
-      html += '<div class="analytics-section"><h3>Leads by Service</h3>';
-      html += renderBarChart(byService, ['blue', 'green', 'amber', 'purple', 'teal', 'red']);
-      html += '</div>';
-
-      // By tier
-      html += '<div class="analytics-section"><h3>Leads by Tier</h3>';
-      html += renderBarChart(byTier, ['green', 'amber', 'purple']);
-      html += '</div>';
-
-      // By source
-      html += '<div class="analytics-section"><h3>Leads by Source</h3>';
-      html += renderBarChart(bySource, ['blue', 'teal']);
-      html += '</div>';
-
-      // By status
-      html += '<div class="analytics-section"><h3>Leads by Status</h3>';
-      html += renderBarChart(byStatus, ['blue', 'amber', 'purple', 'green', 'red']);
-      html += '</div>';
-
-      // ── Widget engagement (events) ────────────────────────────
-      if (allEvents.length > 0) {
-        html += renderEngagementSection();
-      }
-
-      el.innerHTML = html;
-      wireSessionDrilldown();
-    }
-
-    function renderEngagementSection() {
-      // Group events by session
       var sessions = {};
       allEvents.forEach(function (e) {
         if (!e.sessionId) return;
@@ -2179,95 +2428,87 @@ export const prerender = false;
       });
       var sessionIds = Object.keys(sessions);
 
-      // Funnel: count sessions that hit each milestone
-      var funnel = {
-        widget_opened: 0,
-        service: 0,
-        questions: 0,
-        tiers: 0,
-        booking: 0,
-      };
+      var funnel = { opened: 0, service: 0, questions: 0, tiers: 0, booking: 0 };
       sessionIds.forEach(function (sid) {
         var evs = sessions[sid];
-        var hit = { widget_opened: false, service: false, questions: false, tiers: false, booking: false };
+        var hit = { opened: false, service: false, questions: false, tiers: false, booking: false };
         evs.forEach(function (e) {
-          if (e.type === 'widget_opened') hit.widget_opened = true;
+          if (e.type === 'widget_opened') hit.opened = true;
           if (e.screen === 'service' || e.type === 'quote_path_selected') hit.service = true;
           if (e.screen === 'questions' || e.type === 'service_selected') hit.questions = true;
           if (e.screen === 'tiers' || e.type === 'tier_viewed') hit.tiers = true;
           if (e.type === 'booking_submitted' || e.type === 'tier_booked') hit.booking = true;
         });
-        if (hit.widget_opened) funnel.widget_opened++;
+        if (hit.opened) funnel.opened++;
         if (hit.service) funnel.service++;
         if (hit.questions) funnel.questions++;
         if (hit.tiers) funnel.tiers++;
         if (hit.booking) funnel.booking++;
       });
 
-      // Most-clicked event types
-      var typeCounts = {};
-      allEvents.forEach(function (e) {
-        typeCounts[e.type] = (typeCounts[e.type] || 0) + 1;
-      });
-
-      // Drop-off screen distribution
-      var dropOffs = {};
-      allEvents.forEach(function (e) {
-        if (e.type === 'drop_off' && e.lastScreen) {
-          dropOffs[e.lastScreen] = (dropOffs[e.lastScreen] || 0) + 1;
-        }
-      });
-
-      // Chat sessions (anything with at least one chat_message_sent)
       var chatSessions = sessionIds.filter(function (sid) {
         return sessions[sid].some(function (e) { return e.type === 'chat_message_sent'; });
       });
-      // Photo uploads
       var photoSessions = sessionIds.filter(function (sid) {
         return sessions[sid].some(function (e) { return (e.photoCount || 0) > 0; });
       });
 
-      var html = '';
+      var conversionRate = funnel.opened > 0
+        ? Math.round((funnel.booking / funnel.opened) * 1000) / 10
+        : 0;
 
-      // Engagement summary
-      html += '<div class="analytics-section"><h3>Widget Engagement</h3>';
-      html += '<div class="analytics-grid">' +
-        analyticsCard(sessionIds.length, 'Total Sessions') +
-        analyticsCard(funnel.widget_opened, 'Widget Opens') +
-        analyticsCard(chatSessions.length, 'Chat Sessions') +
-        analyticsCard(photoSessions.length, 'Photo Uploads') +
-      '</div>';
+      // ── KPI cards ───────────────────────────────────────────────
+      html += '<div class="analytics-kpi-grid">';
+      html += kpiCard('Total Leads', allBookings.length, thisWeek.length + ' this week', 'primary');
+      html += kpiCard('Sessions', sessionIds.length, funnel.opened + ' widget opens', 'blue');
+      html += kpiCard('Conversion Rate', conversionRate + '%', 'opens → booking', 'green');
+      html += kpiCard('Chat Conversations', chatSessions.length, photoSessions.length + ' with photos', 'amber');
       html += '</div>';
 
-      // Funnel
-      html += '<div class="analytics-section"><h3>Conversion Funnel</h3>';
-      var funnelData = {
-        '1. Opened widget': funnel.widget_opened,
-        '2. Picked a service': funnel.service,
-        '3. Answered questions': funnel.questions,
-        '4. Viewed pricing': funnel.tiers,
-        '5. Submitted booking': funnel.booking,
-      };
-      html += renderBarChart(funnelData, ['blue', 'teal', 'amber', 'purple', 'green']);
+      // ── Funnel + breakdowns row ─────────────────────────────────
+      html += '<div class="analytics-row">';
+      html += '<div class="analytics-section"><h3>Conversion Funnel <span class="count-pill">' + sessionIds.length + ' sessions</span></h3>';
+      html += renderFunnel([
+        { label: 'Opened the widget',  value: funnel.opened },
+        { label: 'Picked a service',   value: funnel.service },
+        { label: 'Answered questions', value: funnel.questions },
+        { label: 'Viewed pricing',     value: funnel.tiers },
+        { label: 'Submitted booking',  value: funnel.booking },
+      ]);
       html += '</div>';
 
-      // Drop-off screens
-      if (Object.keys(dropOffs).length > 0) {
-        html += '<div class="analytics-section"><h3>Drop-off Screens</h3>';
-        html += renderBarChart(dropOffs, ['red', 'amber', 'purple', 'blue']);
-        html += '</div>';
-      }
+      // Service breakdown (from leads)
+      var byService = {};
+      allBookings.forEach(function (b) { if (b.service) byService[b.service] = (byService[b.service] || 0) + 1; });
+      html += '<div class="analytics-section"><h3>Leads by Service <span class="count-pill">' + allBookings.length + '</span></h3>';
+      html += Object.keys(byService).length
+        ? renderBarChart(byService, ['blue', 'green', 'amber', 'purple', 'teal', 'red'])
+        : '<p style="color:#94a3b8;font-size:13px;">No bookings yet.</p>';
+      html += '</div>';
+      html += '</div>';
 
-      // Most-fired events
-      html += '<div class="analytics-section"><h3>Top Events</h3>';
-      var topTypes = {};
-      Object.entries(typeCounts).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 10).forEach(function (e) {
-        topTypes[e[0]] = e[1];
+      // Drop-off screens + tier breakdown
+      var dropOffs = {};
+      allEvents.forEach(function (e) {
+        if (e.type === 'drop_off' && e.lastScreen) dropOffs[e.lastScreen] = (dropOffs[e.lastScreen] || 0) + 1;
       });
-      html += renderBarChart(topTypes, ['teal', 'blue', 'amber', 'purple', 'green', 'red']);
+      var byTier = {};
+      allBookings.forEach(function (b) { if (b.tier) byTier[b.tier] = (byTier[b.tier] || 0) + 1; });
+
+      html += '<div class="analytics-row">';
+      html += '<div class="analytics-section"><h3>Drop-off Screens</h3>';
+      html += Object.keys(dropOffs).length
+        ? renderBarChart(dropOffs, ['red', 'amber', 'purple', 'blue'])
+        : '<p style="color:#94a3b8;font-size:13px;">No drop-offs recorded yet.</p>';
+      html += '</div>';
+      html += '<div class="analytics-section"><h3>Leads by Tier</h3>';
+      html += Object.keys(byTier).length
+        ? renderBarChart(byTier, ['green', 'amber', 'purple'])
+        : '<p style="color:#94a3b8;font-size:13px;">No tier selections yet.</p>';
+      html += '</div>';
       html += '</div>';
 
-      // Recent sessions list
+      // ── Recent sessions ─────────────────────────────────────────
       var recent = sessionIds.map(function (sid) {
         var evs = sessions[sid];
         evs.sort(function (a, b) { return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(); });
@@ -2275,7 +2516,6 @@ export const prerender = false;
           id: sid,
           start: evs[0].timestamp,
           end: evs[evs.length - 1].timestamp,
-          events: evs,
           eventCount: evs.length,
           chatCount: evs.filter(function (e) { return e.type === 'chat_message_sent'; }).length,
           photoCount: evs.reduce(function (sum, e) { return sum + (e.photoCount || 0); }, 0),
@@ -2284,35 +2524,107 @@ export const prerender = false;
         };
       }).sort(function (a, b) { return new Date(b.start).getTime() - new Date(a.start).getTime(); }).slice(0, 25);
 
-      html += '<div class="analytics-section"><h3>Recent Sessions</h3>';
-      html += '<table class="admin-leads-table"><thead><tr>' +
-        '<th>Started</th><th>Last Screen</th><th>Events</th><th>Chat Msgs</th><th>Photos</th><th>Booked?</th><th></th>' +
-      '</tr></thead><tbody>';
-      recent.forEach(function (s) {
-        html += '<tr>' +
-          '<td>' + esc(new Date(s.start).toLocaleString()) + '</td>' +
-          '<td>' + esc(s.lastScreen) + '</td>' +
-          '<td>' + s.eventCount + '</td>' +
-          '<td>' + s.chatCount + '</td>' +
-          '<td>' + s.photoCount + '</td>' +
-          '<td>' + (s.booked ? '<span style="color:#059669;font-weight:600;">Yes</span>' : '<span style="color:#94a3b8;">No</span>') + '</td>' +
-          '<td><button class="admin-link-btn" data-session-id="' + esc(s.id) + '">View</button></td>' +
-        '</tr>';
-      });
-      html += '</tbody></table></div>';
+      html += '<div class="analytics-section"><h3>Recent Sessions <span class="count-pill">click to drill down</span></h3>';
+      if (recent.length === 0) {
+        html += '<p style="color:#94a3b8;font-size:13px;">No sessions recorded yet.</p>';
+      } else {
+        html += '<table class="analytics-sessions-table"><thead><tr>' +
+          '<th>Started</th><th>Last Screen</th><th>Events</th><th>Chat</th><th>Photos</th><th>Outcome</th><th></th>' +
+        '</tr></thead><tbody>';
+        recent.forEach(function (s) {
+          html += '<tr>' +
+            '<td>' + esc(formatRelative(s.start)) + '</td>' +
+            '<td><code style="font-size:11px;background:#f1f5f9;padding:2px 6px;border-radius:4px;">' + esc(s.lastScreen) + '</code></td>' +
+            '<td>' + s.eventCount + '</td>' +
+            '<td>' + (s.chatCount || '<span style="color:#cbd5e1;">—</span>') + '</td>' +
+            '<td>' + (s.photoCount || '<span style="color:#cbd5e1;">—</span>') + '</td>' +
+            '<td>' + (s.booked
+              ? '<span class="analytics-badge" data-tone="green">Booked</span>'
+              : '<span class="analytics-badge" data-tone="gray">No booking</span>') + '</td>' +
+            '<td><button class="admin-link-btn" data-session-id="' + esc(s.id) + '">View &rarr;</button></td>' +
+          '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+      html += '</div>';
 
-      // Drilldown panel
       html += '<div id="session-drilldown" class="analytics-section" style="display:none;"></div>';
 
+      el.innerHTML = html;
+      wireSessionDrilldown();
+      wireAnalyticsControls();
+    }
+
+    function renderAnalyticsHeader() {
+      return '<div class="analytics-page-header">' +
+        '<div>' +
+          '<h2>Analytics</h2>' +
+          '<p>Sessions, conversion funnel, drop-offs, and chat transcripts for the quote widget.</p>' +
+        '</div>' +
+        '<div class="analytics-page-header-actions">' +
+          '<button class="analytics-refresh-btn" id="analytics-refresh-btn" type="button">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>' +
+            'Refresh' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function wireAnalyticsControls() {
+      var btn = document.getElementById('analytics-refresh-btn');
+      if (btn) btn.addEventListener('click', function () { loadLeads(); });
+    }
+
+    function kpiCard(label, value, sub, tone) {
+      return '<div class="analytics-kpi" data-tone="' + esc(tone || 'primary') + '">' +
+        '<div class="analytics-kpi-label">' + esc(label) + '</div>' +
+        '<div class="analytics-kpi-value">' + esc(String(value)) + '</div>' +
+        (sub ? '<div class="analytics-kpi-sub">' + esc(sub) + '</div>' : '') +
+      '</div>';
+    }
+
+    function renderFunnel(steps) {
+      if (steps.length === 0) return '';
+      var max = steps[0].value || 1;
+      var html = '';
+      steps.forEach(function (s, i) {
+        var pct = max > 0 ? Math.max(2, Math.round((s.value / max) * 100)) : 2;
+        var rate = (i > 0 && steps[i - 1].value > 0)
+          ? Math.round((s.value / steps[i - 1].value) * 100) + '% from prev'
+          : '';
+        html += '<div class="analytics-funnel-step">' +
+          '<div class="analytics-funnel-num">' + (i + 1) + '</div>' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:600;color:#0E121B;margin-bottom:4px;">' + esc(s.label) +
+              (rate ? ' <span class="analytics-funnel-rate">&middot; ' + rate + '</span>' : '') +
+            '</div>' +
+            '<div class="analytics-funnel-bar">' +
+              '<div class="analytics-funnel-fill" style="width:' + pct + '%">' +
+                (s.value > 0 ? s.value : '') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="analytics-funnel-count">' + s.value + '</div>' +
+        '</div>';
+      });
       return html;
+    }
+
+    function formatRelative(iso) {
+      var d = new Date(iso);
+      var diff = (Date.now() - d.getTime()) / 1000;
+      if (diff < 60) return Math.floor(diff) + 's ago';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      if (diff < 7 * 86400) return Math.floor(diff / 86400) + 'd ago';
+      return d.toLocaleDateString();
     }
 
     function wireSessionDrilldown() {
       var btns = document.querySelectorAll('[data-session-id]');
       btns.forEach(function (btn) {
         btn.addEventListener('click', function () {
-          var sid = btn.getAttribute('data-session-id');
-          renderSessionDrilldown(sid);
+          renderSessionDrilldown(btn.getAttribute('data-session-id'));
         });
       });
     }
@@ -2326,30 +2638,31 @@ export const prerender = false;
         panel.style.display = 'none';
         return;
       }
-      var html = '<h3>Session ' + esc(sessionId) + '</h3>';
-      html += '<div style="font-size:12px;color:#64748b;margin-bottom:12px;">' +
-        evs.length + ' events &middot; ' +
-        new Date(evs[0].timestamp).toLocaleString() + ' → ' +
-        new Date(evs[evs.length - 1].timestamp).toLocaleString() +
-      '</div>';
-      html += '<table class="admin-leads-table"><thead><tr>' +
-        '<th>Time</th><th>Type</th><th>Screen</th><th>Detail</th>' +
-      '</tr></thead><tbody>';
+      var duration = Math.round((new Date(evs[evs.length - 1].timestamp).getTime() - new Date(evs[0].timestamp).getTime()) / 1000);
+
+      var html = '<h3>Session timeline <span class="count-pill">' + evs.length + ' events &middot; ' + duration + 's</span></h3>';
+      html += '<div style="font-size:12px;color:#94a3b8;margin-bottom:16px;font-family:ui-monospace,monospace;">' + esc(sessionId) + '</div>';
+
       evs.forEach(function (e) {
         var detail = '';
-        if (e.role && e.message) detail = '<strong>' + esc(e.role) + ':</strong> ' + esc(e.message);
-        else if (e.serviceId) detail = 'service: ' + esc(e.serviceId);
-        else if (e.tier) detail = 'tier: ' + esc(e.tier);
-        else if (e.lastScreen) detail = 'last: ' + esc(e.lastScreen);
-        else if (e.route) detail = 'route: ' + esc(e.route);
-        html += '<tr>' +
-          '<td style="font-size:11px;white-space:nowrap;">' + esc(new Date(e.timestamp).toLocaleTimeString()) + '</td>' +
-          '<td><code>' + esc(e.type) + '</code></td>' +
-          '<td>' + esc(e.screen || '—') + '</td>' +
-          '<td>' + detail + '</td>' +
-        '</tr>';
+        if (e.role && e.message) {
+          detail = '<div class="session-chat-bubble" data-role="' + esc(e.role) + '">' +
+            '<strong>' + esc(e.role) + ':</strong> ' + esc(e.message) +
+          '</div>';
+        } else if (e.serviceId) detail = 'service: <strong>' + esc(e.serviceId) + '</strong>';
+        else if (e.tier) detail = 'tier: <strong>' + esc(e.tier) + '</strong>';
+        else if (e.lastScreen) detail = 'last screen: <strong>' + esc(e.lastScreen) + '</strong>';
+        else if (e.route) detail = 'route: <strong>' + esc(e.route) + '</strong>';
+        else if (e.photoCount) detail = '<strong>' + e.photoCount + '</strong> photo(s) attached';
+        else if (e.screen) detail = '<span style="color:#94a3b8;">screen: ' + esc(e.screen) + '</span>';
+
+        html += '<div class="session-event-row">' +
+          '<div class="session-event-time">' + esc(new Date(e.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })) + '</div>' +
+          '<div><span class="session-event-type">' + esc(e.type) + '</span></div>' +
+          '<div class="session-event-detail">' + detail + '</div>' +
+        '</div>';
       });
-      html += '</tbody></table>';
+
       panel.innerHTML = html;
       panel.style.display = 'block';
       panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2384,7 +2697,26 @@ export const prerender = false;
       }
     });
 
+    // ── Storage status check ────────────────────────────────────
+    function checkStorageStatus() {
+      fetch('/api/storage-status')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var banner = document.getElementById('admin-storage-banner');
+          if (!banner) return;
+          if (d.kvEnabled) {
+            banner.style.display = 'none';
+          } else {
+            document.getElementById('admin-storage-banner-text').textContent =
+              d.warning || 'Vercel KV is not attached. Data will not persist.';
+            banner.style.display = 'block';
+          }
+        })
+        .catch(function () { /* non-critical */ });
+    }
+
     // ── Init ─────────────────────────────────────────────────────
+    checkStorageStatus();
     loadConfig();
     // Chat config is wired after renderEditor via wireEvents
   })();

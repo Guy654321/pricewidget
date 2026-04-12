@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { isKvEnabled } from '../../lib/storage';
+import { isKvEnabled, kvDebugInfo } from '../../lib/storage';
 
 export const prerender = false;
 
@@ -13,9 +13,11 @@ export const GET: APIRoute = async () => {
     JSON.stringify({
       kvEnabled: isKvEnabled,
       mode: isKvEnabled ? 'kv' : 'filesystem',
+      detectedUrlVar: kvDebugInfo.urlVar,
+      detectedTokenVar: kvDebugInfo.tokenVar,
       warning: isKvEnabled
         ? null
-        : 'Vercel KV is not attached. Bookings, admin saves, and analytics events are NOT persisting. Attach Vercel KV to the project Storage tab to fix.',
+        : 'Vercel KV is not attached. Bookings, admin saves, and analytics events are NOT persisting. Attach Vercel KV to the project Storage tab and redeploy.',
     }),
     {
       status: 200,

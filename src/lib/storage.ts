@@ -17,10 +17,35 @@ import path from 'node:path';
 
 // ── Upstash REST client (no SDK dep — keeps cold start fast) ──────────────
 
-const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+// Vercel KV / Upstash inject env vars under various prefixes depending on
+// how the store was created. Try every known name so it "just works".
+function pickEnv(...keys: string[]): string | undefined {
+  for (const k of keys) {
+    if (process.env[k]) return process.env[k];
+  }
+  return undefined;
+}
+
+const KV_URL = pickEnv(
+  'KV_REST_API_URL',
+  'UPSTASH_REDIS_REST_URL',
+  'KV_URL',                    // Vercel KV sometimes uses this
+  'REDIS_URL',                 // generic fallback
+);
+const KV_TOKEN = pickEnv(
+  'KV_REST_API_TOKEN',
+  'UPSTASH_REDIS_REST_TOKEN',
+  'KV_REST_API_READ_ONLY_TOKEN',  // read-only still lets us detect KV
+  'REDIS_TOKEN',
+);
 
 export const isKvEnabled = Boolean(KV_URL && KV_TOKEN);
+export const kvDebugInfo = {
+  urlVar: ['KV_REST_API_URL', 'UPSTASH_REDIS_REST_URL', 'KV_URL', 'REDIS_URL']
+    .find((k) => Boolean(process.env[k])) || null,
+  tokenVar: ['KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_TOKEN', 'KV_REST_API_READ_ONLY_TOKEN', 'REDIS_TOKEN']
+    .find((k) => Boolean(process.env[k])) || null,
+};
 
 async function kvCommand<T = unknown>(command: (string | number)[]): Promise<T | null> {
   if (!KV_URL || !KV_TOKEN) return null;

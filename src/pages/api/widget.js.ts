@@ -98,6 +98,7 @@ export const GET: APIRoute = async ({ url }) => {
     open: function () {
       mount();
       isOpen = true;
+      wrap.style.visibility = "visible";
       overlay.dataset.open = "true";
       wrap.dataset.open = "true";
       document.body.classList.add("ds-w-locked");
@@ -114,6 +115,8 @@ export const GET: APIRoute = async ({ url }) => {
       wrap.dataset.open = "false";
       document.body.classList.remove("ds-w-locked");
       document.removeEventListener("keydown", onKey);
+      // Force-hide after transition to prevent stale white panel
+      setTimeout(function(){ if(!isOpen && wrap){ wrap.style.visibility="hidden"; } }, 280);
     },
     toggle: function () { isOpen ? api.close() : api.open(); }
   };

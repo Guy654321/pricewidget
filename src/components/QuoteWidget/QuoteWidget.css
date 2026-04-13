@@ -655,22 +655,31 @@
 .ds-chat-messages {
   flex: 1; overflow-y: auto; overflow-x: hidden;
   scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 14px 14px 8px;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 20px 16px 12px;
+  background: var(--ds-surface-2);
 }
 .ds-msg-bubble {
-  max-width: 82%; padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 0.8875rem; line-height: 1.55; word-break: break-word;
+  max-width: 80%; padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 0.875rem; line-height: 1.6; word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  animation: ds-msg-in 0.25s ease-out;
+}
+@keyframes ds-msg-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .ds-msg-bubble[data-role="user"] {
   align-self: flex-end;
   background: var(--ds-primary); color: var(--ds-surface);
   border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 6px rgba(15,61,62,0.2);
 }
 .ds-msg-bubble[data-role="assistant"] {
   align-self: flex-start;
-  background: var(--ds-surface-3); color: var(--ds-ink);
+  background: var(--ds-surface); color: var(--ds-ink);
+  border: 1px solid var(--ds-border);
   border-bottom-left-radius: 4px;
 }
 .ds-msg-bubble.ds-msg-error {
@@ -686,16 +695,18 @@
 
 /* Chat route card (shown after AI explains the issue) */
 .ds-route-card {
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 10px;
   align-self: flex-start; max-width: 88%;
-  padding: 14px;
-  background: var(--ds-surface-2);
+  padding: 16px;
+  background: var(--ds-surface);
   border: 1.5px solid var(--ds-border);
   border-radius: var(--ds-r-md);
   margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  animation: ds-msg-in 0.25s ease-out;
 }
 .ds-route-card-text {
-  font-size: 0.8125rem; color: var(--ds-ink-2); line-height: 1.5;
+  font-size: 0.8125rem; color: var(--ds-ink-2); line-height: 1.55;
 }
 .ds-route-card-btn {
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -711,10 +722,12 @@
 
 /* Typing indicator */
 .ds-typing-indicator {
-  display: none; align-items: center; gap: 4px;
-  padding: 10px 14px; background: var(--ds-surface-3);
-  border-radius: 16px; border-bottom-left-radius: 4px;
-  align-self: flex-start; margin: 0 14px 2px; flex-shrink: 0;
+  display: none; align-items: center; gap: 5px;
+  padding: 10px 16px; background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: 18px; border-bottom-left-radius: 4px;
+  align-self: flex-start; margin: 0 16px 2px; flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 .ds-typing-indicator[data-visible="true"] { display: flex; }
 .ds-typing-dot {
@@ -751,22 +764,22 @@
 
 /* Chat form */
 .ds-chat-form {
-  display: flex; align-items: flex-end; gap: 6px;
-  padding: 8px 10px;
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 12px 14px;
   border-top: 1px solid var(--ds-border);
   background: var(--ds-surface); flex-shrink: 0;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 .ds-chat-input {
-  flex: 1; padding: 10px 14px;
-  border: 1.5px solid var(--ds-border); border-radius: 20px;
+  flex: 1; padding: 11px 16px;
+  border: 1.5px solid var(--ds-border); border-radius: 22px;
   font-family: var(--ds-font); font-size: 0.875rem; color: var(--ds-ink);
   background: var(--ds-surface-2); outline: none;
-  transition: border-color 0.15s; min-height: 44px; max-height: 120px;
+  transition: border-color 0.15s, box-shadow 0.15s; min-height: 44px; max-height: 120px;
   resize: none; overflow-y: auto;
   line-height: 1.45;
 }
-.ds-chat-input:focus  { border-color: var(--ds-primary); background: var(--ds-surface); }
+.ds-chat-input:focus  { border-color: var(--ds-primary); background: var(--ds-surface); box-shadow: 0 0 0 3px rgba(15,61,62,0.08); }
 .ds-chat-input::placeholder { color: #94a3b8; }
 .ds-chat-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
@@ -1089,26 +1102,30 @@
 .ds-chat-suggestions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 4px 0 8px;
+  gap: 8px;
+  padding: 6px 0 10px;
 }
 .ds-chat-suggest-pill {
   display: inline-block;
-  padding: 6px 14px;
-  background: var(--ds-surface-3);
-  border: 1px solid var(--ds-border);
+  padding: 8px 16px;
+  background: var(--ds-surface);
+  border: 1.5px solid var(--ds-border);
   border-radius: 20px;
   font-size: 0.8125rem;
+  font-weight: 500;
   font-family: inherit;
   color: var(--ds-ink);
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .ds-chat-suggest-pill:hover {
   background: var(--ds-primary);
   color: #fff;
   border-color: var(--ds-primary);
+  box-shadow: 0 2px 6px rgba(15,61,62,0.2);
+  transform: translateY(-1px);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

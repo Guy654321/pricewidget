@@ -539,6 +539,11 @@ const availability = jsonAvailability || { enabled: false };
     if (screen === 'opener_info')  renderOpenerInfo();
 
     fireGtm('screen_changed', { screen: screen });
+
+    // Tell parent iframe host which screen we're on so it can resize
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'ds-widget-screen', screen: screen }, '*');
+    }
   }
 
   function goBack() {

@@ -41,6 +41,8 @@ export const GET: APIRoute = async ({ url }) => {
     /* Desktop: right-side panel */
     ".ds-w-wrap{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);z-index:2147483647;transform:translateX(100%);opacity:1;pointer-events:none;transition:transform .3s cubic-bezier(.4,0,.2,1);}",
     ".ds-w-wrap[data-open='true']{transform:translateX(0);pointer-events:auto;}",
+    /* Wide mode for pricing tiers — centered panel */
+    "@media(min-width:521px){.ds-w-wrap[data-wide='true']{top:50%;right:auto;left:50%;bottom:auto;width:min(1080px,calc(100vw - 48px));height:min(720px,calc(100dvh - 48px));transform:translate(-50%,-50%);border-radius:18px;overflow:hidden;}.ds-w-wrap[data-wide='true'][data-open='true']{transform:translate(-50%,-50%);}.ds-w-wrap[data-wide='true'] iframe{border-radius:18px;}}",
     ".ds-w-wrap iframe{width:100%;height:100%;border:0;background:#fff;display:block;}",
     ".ds-w-close{position:absolute;top:12px;right:12px;z-index:2;width:36px;height:36px;border-radius:999px;border:0;background:rgba(255,255,255,0.95);box-shadow:0 2px 8px rgba(0,0,0,0.15);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:22px;line-height:1;color:#0E121B;padding:0;transition:background .15s;}",
     ".ds-w-close:hover{background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.22);}",
@@ -124,6 +126,11 @@ export const GET: APIRoute = async ({ url }) => {
     if (e.origin !== ORIGIN) return;
     var d = e.data;
     if (d === "ds-widget-close" || (d && d.type === "ds-widget-close")) api.close();
+    // Resize panel based on widget screen (wide for tiers, narrow for others)
+    if (d && d.type === "ds-widget-screen" && wrap) {
+      var wide = d.screen === "tiers";
+      wrap.dataset.wide = wide ? "true" : "false";
+    }
   });
 
   window.DerbyWidget = api;

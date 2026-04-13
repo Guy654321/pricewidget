@@ -1747,11 +1747,7 @@ export const prerender = false;
           var area = root.querySelector('.admin-img-area[data-upload="' + key + '"]');
           var hiddenInput = area.closest('.admin-tier-card').querySelector('[data-field="image"]');
           hiddenInput.value = '';
-          area.innerHTML = '<div class="upload-hint"><strong>Click to upload</strong> or drag & drop</div>';
-          // Re-add file input
-          var fi = document.createElement('input');
-          fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
-          area.appendChild(fi);
+          rewireImageArea(area, key);
         });
       });
 
@@ -1944,6 +1940,36 @@ export const prerender = false;
     }
 
     // ── Image upload ─────────────────────────────────────────────
+    function rewireImageArea(area, key) {
+      area.innerHTML = '<div class="upload-hint"><strong>Click to upload</strong> or drag & drop</div>';
+      var fi = document.createElement('input');
+      fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
+      area.appendChild(fi);
+
+      area.addEventListener('click', function (e) {
+        if (e.target.closest('.admin-img-remove')) return;
+        fi.click();
+      });
+      fi.addEventListener('change', function () {
+        if (fi.files.length > 0) uploadImage(fi.files[0], area, key);
+        fi.value = '';
+      });
+      area.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        area.dataset.dragging = 'true';
+      });
+      area.addEventListener('dragleave', function () {
+        area.dataset.dragging = 'false';
+      });
+      area.addEventListener('drop', function (e) {
+        e.preventDefault();
+        area.dataset.dragging = 'false';
+        if (e.dataTransfer.files.length > 0) {
+          uploadImage(e.dataTransfer.files[0], area, key);
+        }
+      });
+    }
+
     async function uploadImage(file, area, key) {
       area.innerHTML = '<div class="upload-hint">Uploading...</div>';
 
@@ -1967,24 +1993,12 @@ export const prerender = false;
         area.querySelector('.admin-img-remove').addEventListener('click', function (e) {
           e.stopPropagation();
           tierCard.querySelector('[data-field="image"]').value = '';
-          area.innerHTML = '<div class="upload-hint"><strong>Click to upload</strong> or drag & drop</div>';
-        });
-
-        // Re-add hidden file input
-        var fi = document.createElement('input');
-        fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
-        area.appendChild(fi);
-        fi.addEventListener('change', function () {
-          if (fi.files.length > 0) uploadImage(fi.files[0], area, key);
-          fi.value = '';
+          rewireImageArea(area, key);
         });
 
       } catch (err) {
         area.innerHTML = '<div class="upload-hint" style="color:#ef4444">Upload failed: ' + esc(err.message) + '</div>';
-        // Re-add file input
-        var fi2 = document.createElement('input');
-        fi2.type = 'file'; fi2.accept = 'image/*'; fi2.style.display = 'none';
-        area.appendChild(fi2);
+        rewireImageArea(area, key);
       }
     }
 

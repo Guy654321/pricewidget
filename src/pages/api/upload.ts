@@ -9,7 +9,6 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'i
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
 // Vercel Blob token — injected when a Blob store is attached to the project.
-// Falls back to filesystem when missing (local dev).
 function pickBlobToken(): string | undefined {
   return (
     process.env.BLOB_READ_WRITE_TOKEN ||
@@ -56,37 +55,58 @@ export const POST: APIRoute = async ({ request }) => {
 
     const blobToken = pickBlobToken();
 
+    // ── Strategy 1: Vercel Blob (production with store attached) ──
     if (blobToken) {
-      // ── Vercel Blob (production) ──────────────────────────────
-      const { put } = await import('@vercel/blob');
-      const blob = await put(`images/${filename}`, file, {
-        access: 'public',
-        token: blobToken,
-        addRandomSuffix: false,
-      });
+      try {
+        const { put } = await import('@vercel/blob');
+        const blob = await put(`images/${filename}`, file, {
+          access: 'public',
+          token: blobToken,
+          addRandomSuffix: false,
+        });
 
-      return new Response(
-        JSON.stringify({ ok: true, path: blob.url, storage: 'blob' }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      );
+        return new Response(
+          JSON.stringify({ ok: true, path: blob.url, storage: 'blob' }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      } catch (blobErr) {
+        console.error('Vercel Blob upload failed:', blobErr);
+        // Fall through to data URL fallback
+      }
     }
 
-    // ── Filesystem fallback (local dev) ───────────────────────────
-    const filePath = path.join(IMAGES_DIR, filename);
-    if (!fs.existsSync(IMAGES_DIR)) {
-      fs.mkdirSync(IMAGES_DIR, { recursive: true });
+    // ── Strategy 2: Filesystem (local dev) ───────────────────────
+    const isVercel = !!process.env.VERCEL;
+    if (!isVercel) {
+      try {
+        const filePath = path.join(IMAGES_DIR, filename);
+        if (!fs.existsSync(IMAGES_DIR)) {
+          fs.mkdirSync(IMAGES_DIR, { recursive: true });
+        }
+        const buffer = Buffer.from(await file.arrayBuffer());
+        fs.writeFileSync(filePath, buffer);
+
+        return new Response(
+          JSON.stringify({ ok: true, path: `/images/${filename}`, storage: 'filesystem' }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      } catch (fsErr) {
+        console.error('Filesystem write failed:', fsErr);
+      }
     }
+
+    // ── Strategy 3: Base64 data URL (works everywhere, no storage needed) ──
     const buffer = Buffer.from(await file.arrayBuffer());
-    fs.writeFileSync(filePath, buffer);
+    const dataUrl = `data:${file.type};base64,${buffer.toString('base64')}`;
 
     return new Response(
-      JSON.stringify({ ok: true, path: `/images/${filename}`, storage: 'filesystem' }),
+      JSON.stringify({ ok: true, path: dataUrl, storage: 'dataurl' }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err) {
     console.error('Upload error:', err);
     return new Response(
-      JSON.stringify({ error: 'Upload failed.' }),
+      JSON.stringify({ error: 'Upload failed. ' + (err instanceof Error ? err.message : '') }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

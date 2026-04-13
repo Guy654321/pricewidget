@@ -1940,8 +1940,12 @@ export const prerender = false;
     }
 
     // ── Image upload ─────────────────────────────────────────────
-    function rewireImageArea(area, key) {
+    function rewireImageArea(oldArea, key) {
+      // Clone node to strip ALL old event listeners
+      var area = oldArea.cloneNode(false);
       area.innerHTML = '<div class="upload-hint"><strong>Click to upload</strong> or drag & drop</div>';
+      oldArea.parentNode.replaceChild(area, oldArea);
+
       var fi = document.createElement('input');
       fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
       area.appendChild(fi);

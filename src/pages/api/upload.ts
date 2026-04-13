@@ -8,7 +8,6 @@ const IMAGES_DIR = path.join(process.cwd(), 'public/images');
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
-// Vercel Blob token — injected when a Blob store is attached to the project.
 function pickBlobToken(): string | undefined {
   return (
     process.env.BLOB_READ_WRITE_TOKEN ||
@@ -44,6 +43,12 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    const mimeType = file.type;
+
+    // Read file buffer ONCE upfront — file streams can only be read once
+    const arrayBuf = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuf);
+
     // Sanitize filename
     const ext = path.extname(file.name).toLowerCase() || '.jpg';
     const base = file.name
@@ -55,14 +60,15 @@ export const POST: APIRoute = async ({ request }) => {
 
     const blobToken = pickBlobToken();
 
-    // ── Strategy 1: Vercel Blob (production with store attached) ──
+    // ── Strategy 1: Vercel Blob ──────────────────────────────────
     if (blobToken) {
       try {
         const { put } = await import('@vercel/blob');
-        const blob = await put(`images/${filename}`, file, {
+        const blob = await put(`images/${filename}`, buffer, {
           access: 'public',
           token: blobToken,
           addRandomSuffix: false,
+          contentType: mimeType,
         });
 
         return new Response(
@@ -71,19 +77,17 @@ export const POST: APIRoute = async ({ request }) => {
         );
       } catch (blobErr) {
         console.error('Vercel Blob upload failed:', blobErr);
-        // Fall through to data URL fallback
+        // Fall through to next strategy
       }
     }
 
-    // ── Strategy 2: Filesystem (local dev) ───────────────────────
-    const isVercel = !!process.env.VERCEL;
-    if (!isVercel) {
+    // ── Strategy 2: Filesystem (local dev only) ──────────────────
+    if (!process.env.VERCEL) {
       try {
         const filePath = path.join(IMAGES_DIR, filename);
         if (!fs.existsSync(IMAGES_DIR)) {
           fs.mkdirSync(IMAGES_DIR, { recursive: true });
         }
-        const buffer = Buffer.from(await file.arrayBuffer());
         fs.writeFileSync(filePath, buffer);
 
         return new Response(
@@ -95,9 +99,8 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    // ── Strategy 3: Base64 data URL (works everywhere, no storage needed) ──
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const dataUrl = `data:${file.type};base64,${buffer.toString('base64')}`;
+    // ── Strategy 3: Base64 data URL (universal fallback) ─────────
+    const dataUrl = `data:${mimeType};base64,${buffer.toString('base64')}`;
 
     return new Response(
       JSON.stringify({ ok: true, path: dataUrl, storage: 'dataurl' }),

@@ -577,5 +577,5 @@
       ]
     }
   ],
-  "smsTemplate": "Hi {name}! Thanks for requesting a {tier} {service} appointment (estimated {price}) with Derby Strong Garage Doors. A specialist will contact you shortly to confirm your visit. Questions? Call us at 502-619-5198."
+  "smsTemplate": "Hi {name}! Thank you for contacting Derby Strong Garage Doors about your {tier} {service} (estimated {price}). A specialist will be calling you shortly to schedule. Questions? Call us at 502-619-5198."
 }

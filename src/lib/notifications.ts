@@ -230,7 +230,7 @@ export async function sendCustomerSms(lead: LeadPayload): Promise<NotificationRe
     const greeting = lead.name ? `Hi ${lead.name}! ` : 'Hi! ';
     const tierService = [lead.tier, lead.service].filter(Boolean).join(' ');
     const priceInfo = lead.price ? ` (estimated ${lead.price})` : '';
-    message = `${greeting}Thanks for reaching out to Derby Strong Garage Doors${tierService ? ` about your ${tierService}` : ''}${priceInfo}. We received your message and will be calling you shortly. Questions? Call us at 502-619-5198.`;
+    message = `${greeting}Thank you for contacting Derby Strong Garage Doors${tierService ? ` about your ${tierService}` : ''}${priceInfo}. A specialist will be calling you shortly to schedule. Questions? Call us at 502-619-5198.`;
   }
 
   return sendTwilioMessage(toE164(phone), message);

@@ -36,18 +36,17 @@ export const GET: APIRoute = async ({ url }) => {
   var style = document.createElement("style");
   style.setAttribute("data-derby-widget", "");
   style.textContent = [
-    ".ds-w-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(10,15,25,0.55);opacity:0;pointer-events:none;transition:opacity .22s ease;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}",
+    ".ds-w-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(10,15,25,0.45);opacity:0;pointer-events:none;transition:opacity .25s ease;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}",
     ".ds-w-overlay[data-open='true']{opacity:1;pointer-events:auto;}",
-    /* Desktop default: centered, wide panel that comfortably fits 3 tier cards side-by-side without scroll */
-    ".ds-w-wrap{position:fixed;top:50%;left:50%;width:min(1080px,calc(100vw - 48px));height:min(720px,calc(100dvh - 48px));z-index:2147483647;transform:translate(-50%,calc(-50% + 16px));opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;}",
-    ".ds-w-wrap[data-open='true']{transform:translate(-50%,-50%);opacity:1;pointer-events:auto;}",
-    ".ds-w-wrap iframe{width:100%;height:100%;border:0;border-radius:18px;box-shadow:0 24px 64px rgba(10,15,25,0.35),0 4px 16px rgba(10,15,25,0.18);background:#fff;display:block;}",
-    ".ds-w-close{position:fixed;top:24px;right:24px;z-index:2147483647;width:40px;height:40px;border-radius:999px;border:0;background:rgba(255,255,255,0.96);box-shadow:0 2px 10px rgba(0,0,0,0.18);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:24px;line-height:1;color:#0E121B;padding:0;}",
-    ".ds-w-wrap[data-open='true'] ~ .ds-w-close{display:flex;}",
-    /* Tablet: shrink to a generous side panel */
-    "@media(max-width:1024px){.ds-w-wrap{top:auto;bottom:0;left:auto;right:0;width:480px;height:min(760px,100dvh);transform:translateY(24px);}.ds-w-wrap[data-open='true']{transform:translateY(0);}.ds-w-wrap iframe{border-radius:18px 18px 0 0;}}",
-    /* Phone: full-screen bottom sheet */
-    "@media(max-width:520px){.ds-w-wrap{width:100vw;height:100dvh;top:0;bottom:0;right:0;left:0;transform:translateY(100%);}.ds-w-wrap[data-open='true']{transform:translateY(0);}.ds-w-wrap iframe{border-radius:0;}.ds-w-overlay{display:none;}}",
+    /* Desktop: right-side panel */
+    ".ds-w-wrap{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);z-index:2147483647;transform:translateX(100%);opacity:1;pointer-events:none;transition:transform .3s cubic-bezier(.4,0,.2,1);}",
+    ".ds-w-wrap[data-open='true']{transform:translateX(0);pointer-events:auto;}",
+    ".ds-w-wrap iframe{width:100%;height:100%;border:0;background:#fff;display:block;}",
+    ".ds-w-close{position:absolute;top:12px;right:12px;z-index:2;width:36px;height:36px;border-radius:999px;border:0;background:rgba(255,255,255,0.95);box-shadow:0 2px 8px rgba(0,0,0,0.15);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:22px;line-height:1;color:#0E121B;padding:0;transition:background .15s;}",
+    ".ds-w-close:hover{background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.22);}",
+    ".ds-w-wrap[data-open='true'] .ds-w-close{display:flex;}",
+    /* Phone: full-screen */
+    "@media(max-width:520px){.ds-w-wrap{width:100vw;}.ds-w-overlay{display:none;}}",
     "body.ds-w-locked{overflow:hidden!important;}"
   ].join("");
   (document.head || document.documentElement).appendChild(style);
@@ -72,7 +71,6 @@ export const GET: APIRoute = async ({ url }) => {
 
     iframe = document.createElement("iframe");
     iframe.src = BASE + "/?embed=1";
-    iframe.setAttribute("loading", "lazy");
     iframe.setAttribute("title", "Derby Strong Instant Quote");
     iframe.setAttribute("allow", "camera; clipboard-write");
     wrap.appendChild(iframe);
@@ -82,10 +80,10 @@ export const GET: APIRoute = async ({ url }) => {
     closeBtn.setAttribute("aria-label", "Close quote panel");
     closeBtn.innerHTML = "&times;";
     closeBtn.addEventListener("click", api.close);
+    wrap.appendChild(closeBtn);
 
     document.body.appendChild(overlay);
     document.body.appendChild(wrap);
-    document.body.appendChild(closeBtn);
   }
 
   function onKey(e) {
@@ -129,6 +127,9 @@ export const GET: APIRoute = async ({ url }) => {
   });
 
   window.DerbyWidget = api;
+
+  // Preload iframe after 3s so it's ready when user clicks
+  setTimeout(function() { mount(); }, 3000);
 
   // Auto-wire any element with [data-derby-widget="open"]
   function wireAuto() {

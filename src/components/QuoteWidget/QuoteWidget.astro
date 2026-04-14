@@ -449,6 +449,9 @@ const availability = jsonAvailability || { enabled: false };
   var AVAILABILITY  = availability;
   var LOCAL_CONFIG_KEY = 'derby_services_config_v1';
   var CONFIG_ENDPOINT = '/api/config';
+  var CONFIG_REFRESH_MS = 15000;
+  var configRefreshTimer = null;
+  var lastConfigSignature = '';
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
   var panel          = document.getElementById('ds-panel');
@@ -721,16 +724,46 @@ const availability = jsonAvailability || { enabled: false };
     serviceGrid.innerHTML = baseCards.join('');
   }
 
+  function configSignature(payload) {
+    try {
+      return JSON.stringify({
+        services: payload && payload.services,
+        contact: payload && payload.contact,
+        trustSignals: payload && payload.trustSignals,
+        availability: payload && payload.availability,
+        priceFlow: payload && payload.priceFlow
+      });
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function applyLiveConfig(payload) {
+    var nextSig = configSignature(payload);
+    var changed = nextSig && nextSig !== lastConfigSignature;
+    if (nextSig) lastConfigSignature = nextSig;
+
+    if (payload && Array.isArray(payload.services)) SERVICES = payload.services.map(normalizeService);
+    if (payload && payload.contact) CONTACT = payload.contact;
+    if (payload && payload.trustSignals) TRUST_SIGNALS = payload.trustSignals;
+    if (payload && payload.availability) AVAILABILITY = payload.availability;
+    if (payload && payload.priceFlow) PRICE_FLOW = payload.priceFlow;
+
+    renderServiceCards();
+
+    if (!changed) return;
+    if (currentScreen === 'questions') renderQuestions();
+    if (currentScreen === 'tiers') renderTiers();
+    if (currentScreen === 'opener_guide') resetOpenerGuide();
+    if (currentScreen === 'opener_info') renderOpenerInfo();
+  }
+
   async function syncConfigFromApi() {
     try {
       var res = await fetch(CONFIG_ENDPOINT, { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var payload = await res.json();
-      if (payload && Array.isArray(payload.services)) SERVICES = payload.services.map(normalizeService);
-      if (payload && payload.contact) CONTACT = payload.contact;
-      if (payload && payload.trustSignals) TRUST_SIGNALS = payload.trustSignals;
-      if (payload && payload.availability) AVAILABILITY = payload.availability;
-      if (payload && payload.priceFlow) PRICE_FLOW = payload.priceFlow;
+      applyLiveConfig(payload);
       try {
         window.localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(payload));
       } catch (_) {}
@@ -739,16 +772,18 @@ const availability = jsonAvailability || { enabled: false };
         var localRaw = window.localStorage.getItem(LOCAL_CONFIG_KEY);
         if (!localRaw) return;
         var localConfig = JSON.parse(localRaw);
-        if (localConfig && Array.isArray(localConfig.services)) SERVICES = localConfig.services.map(normalizeService);
-        if (localConfig && localConfig.contact) CONTACT = localConfig.contact;
-        if (localConfig && localConfig.trustSignals) TRUST_SIGNALS = localConfig.trustSignals;
-        if (localConfig && localConfig.availability) AVAILABILITY = localConfig.availability;
-        if (localConfig && localConfig.priceFlow) PRICE_FLOW = localConfig.priceFlow;
+        applyLiveConfig(localConfig);
       } catch (_) {
         // Ignore invalid local fallback data.
       }
     }
-    renderServiceCards();
+  }
+
+  function startConfigAutoRefresh() {
+    if (configRefreshTimer) return;
+    configRefreshTimer = window.setInterval(function () {
+      syncConfigFromApi();
+    }, CONFIG_REFRESH_MS);
   }
 
   // ── Opener Guide (data-driven from config) ───────────────────────────────────
@@ -1887,6 +1922,12 @@ const availability = jsonAvailability || { enabled: false };
   // ── Wire controls ─────────────────────────────────────────────────────────────
   renderServiceCards();
   syncConfigFromApi();
+  startConfigAutoRefresh();
+
+  window.addEventListener('focus', function () { syncConfigFromApi(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') syncConfigFromApi();
+  });
 
   trigger.addEventListener('click', openPanel);
   closeBtn.addEventListener('click', closePanel);

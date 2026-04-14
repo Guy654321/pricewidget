@@ -1,12 +1,25 @@
 import type { APIRoute } from 'astro';
-import { getRaw, setJSON, isKvEnabled } from '../../lib/storage';
+import { getRaw, setJSON, isKvEnabled, getRawFromKv, getRawFromFs } from '../../lib/storage';
 
 export const prerender = false;
 
 const STORAGE_KEY = 'services';
 const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ url }) => {
+  // Debug mode: ?source=debug shows where data is coming from
+  if (url.searchParams.get('source') === 'debug') {
+    const kvRaw = await getRawFromKv(STORAGE_KEY);
+    const fsRaw = await getRawFromFs(STORAGE_KEY);
+    return new Response(JSON.stringify({
+      kvEnabled: isKvEnabled,
+      kvHasData: kvRaw != null,
+      kvDataLength: kvRaw?.length ?? 0,
+      fsDataLength: fsRaw?.length ?? 0,
+      servingFrom: kvRaw != null ? 'kv' : 'bundled-file',
+    }), { status: 200, headers: JSON_HEADERS });
+  }
+
   const raw = await getRaw(STORAGE_KEY);
   if (raw == null) {
     return new Response(JSON.stringify({ error: 'Failed to read config.' }), {

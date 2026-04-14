@@ -168,6 +168,21 @@ export async function getList<T = unknown>(key: string): Promise<T[]> {
 }
 
 /**
+ * Read raw from KV only (for debugging).
+ */
+export async function getRawFromKv(key: string): Promise<string | null> {
+  if (!isKvEnabled) return null;
+  return kvCommand<string>(['GET', key]);
+}
+
+/**
+ * Read raw from filesystem only (for debugging).
+ */
+export function getRawFromFs(key: string): string | null {
+  return fsRead(key);
+}
+
+/**
  * Convenience: read raw text (used by /api/config, which streams the
  * services.json bytes straight back to the client).
  */

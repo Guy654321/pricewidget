@@ -4,7 +4,10 @@ import { getRaw, setJSON, isKvEnabled, getRawFromKv, getRawFromFs } from '../../
 export const prerender = false;
 
 const STORAGE_KEY = 'services';
-const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
+const JSON_HEADERS = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store, max-age=0',
+} as const;
 
 export const GET: APIRoute = async ({ url }) => {
   // Debug mode: ?source=debug shows where data is coming from

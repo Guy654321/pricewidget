@@ -74,8 +74,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   // Fire owner email + owner SMS + customer confirmation SMS in parallel.
   // Never block or fail the booking response if a provider hiccups.
+  let notifications: Record<string, unknown> = {};
   try {
-    await dispatchLeadNotifications({
+    const results = await dispatchLeadNotifications({
       name: booking.name,
       phone: booking.phone,
       zip: booking.zip,
@@ -85,11 +86,16 @@ export const POST: APIRoute = async ({ request }) => {
       price: booking.price,
       source: booking.source,
     });
+    // Extract results from Promise.allSettled
+    for (const [key, result] of Object.entries(results)) {
+      notifications[key] = result.status === 'fulfilled' ? result.value : { ok: false, error: String(result.reason) };
+    }
   } catch (err) {
     console.error('[bookings] Notification dispatch error:', err);
+    notifications = { error: String(err) };
   }
 
-  return new Response(JSON.stringify({ ok: true, id: booking.id }), {
+  return new Response(JSON.stringify({ ok: true, id: booking.id, notifications }), {
     status: 201,
     headers: JSON_HEADERS,
   });

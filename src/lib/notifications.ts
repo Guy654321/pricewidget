@@ -168,7 +168,13 @@ async function sendTwilioMessage(to: string, body: string): Promise<Notification
     if (!res.ok) {
       const errText = await res.text();
       console.error('[notifications] Twilio error:', res.status, errText);
-      return { ok: false, error: 'SMS send failed.' };
+      // Parse Twilio error for actionable message
+      let detail = 'SMS send failed.';
+      try {
+        const parsed = JSON.parse(errText);
+        if (parsed.message) detail = parsed.message;
+      } catch { /* keep generic */ }
+      return { ok: false, error: detail };
     }
 
     return { ok: true };

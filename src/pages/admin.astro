@@ -1661,7 +1661,7 @@ export const prerender = false;
 
     function renderTierCard(si, ti, tier) {
       var imgPreview = tier.image
-        ? '<img src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="lazy" decoding="async" width="200" height="120">' +
+        ? '<img src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="eager" decoding="async" width="200" height="120">' +
           '<button class="admin-img-remove" data-clear-img="' + si + '-' + ti + '" type="button">&times;</button>'
         : '<div class="upload-hint"><strong>Click to upload</strong> or drag &amp; drop</div>';
 
@@ -2035,7 +2035,7 @@ export const prerender = false;
         tierCard.querySelector('[data-field="image"]').value = imgPath;
 
         area.innerHTML =
-          '<img src="' + escAttr(imgPath) + '" alt="Uploaded image" loading="lazy" decoding="async" width="200" height="120" />' +
+          '<img src="' + escAttr(imgPath) + '" alt="Uploaded image" loading="eager" decoding="async" width="200" height="120" />' +
           '<button class="admin-img-remove" data-clear-img="' + key + '" type="button">&times;</button>';
 
         // Re-wire clear button

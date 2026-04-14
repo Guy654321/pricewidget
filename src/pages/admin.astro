@@ -2031,7 +2031,7 @@ export const prerender = false;
         tierCard.querySelector('[data-field="image"]').value = dataUrl;
 
         area.innerHTML =
-          '<img src="' + escAttr(dataUrl) + '" alt="Uploaded image" loading="eager" decoding="async" width="200" height="120" />' +
+          '<img src="' + escAttr(imgPath) + '" alt="Uploaded image" loading="eager" decoding="async" width="200" height="120" />' +
           '<button class="admin-img-remove" data-clear-img="' + key + '" type="button">&times;</button>';
 
         // Re-wire clear button

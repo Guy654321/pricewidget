@@ -1090,7 +1090,7 @@ const availability = jsonAvailability || { enabled: false };
         ? '<span class="ds-tier-popular-badge">Most Popular</span>' : '';
 
       var imageHtml = tier.image
-        ? '<div class="ds-tier-img-wrap"><img class="ds-tier-img" src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="lazy" decoding="async" width="300" height="180"></div>'
+        ? '<div class="ds-tier-img-wrap"><img class="ds-tier-img" src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="eager" decoding="async" fetchpriority="high" width="300" height="180"></div>'
         : '';
 
       var priceRangeHtml = tier.priceRange

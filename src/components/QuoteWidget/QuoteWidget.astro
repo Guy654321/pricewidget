@@ -738,12 +738,31 @@ const availability = jsonAvailability || { enabled: false };
     }
   }
 
+  var preloadedImageUrls = Object.create(null);
+  function preloadTierImages(services) {
+    if (!Array.isArray(services)) return;
+    services.forEach(function (svc) {
+      if (!svc || !Array.isArray(svc.tiers)) return;
+      svc.tiers.forEach(function (tier) {
+        var src = tier && typeof tier.image === 'string' ? tier.image : '';
+        if (!src || preloadedImageUrls[src]) return;
+        var img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+        preloadedImageUrls[src] = true;
+      });
+    });
+  }
+
   function applyLiveConfig(payload) {
     var nextSig = configSignature(payload);
     var changed = nextSig && nextSig !== lastConfigSignature;
     if (nextSig) lastConfigSignature = nextSig;
 
-    if (payload && Array.isArray(payload.services)) SERVICES = payload.services.map(normalizeService);
+    if (payload && Array.isArray(payload.services)) {
+      SERVICES = payload.services.map(normalizeService);
+      preloadTierImages(SERVICES);
+    }
     if (payload && payload.contact) CONTACT = payload.contact;
     if (payload && payload.trustSignals) TRUST_SIGNALS = payload.trustSignals;
     if (payload && payload.availability) AVAILABILITY = payload.availability;

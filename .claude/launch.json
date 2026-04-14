@@ -10,7 +10,7 @@
     {
       "name": "3locationgaragedoors (main site dev)",
       "runtimeExecutable": "/Users/guymei-tal/.nvm/versions/node/v20.11.1/bin/node",
-      "runtimeArgs": ["/Users/guymei-tal/3locationgaragedoors/node_modules/.bin/astro", "dev", "--root", "/Users/guymei-tal/3locationgaragedoors"],
+      "runtimeArgs": ["/Users/guymei-tal/3locationgaragedoors/node_modules/.bin/astro", "dev", "--root", "/Users/guymei-tal/3locationgaragedoors", "--port", "4322"],
       "port": 4322
     }
   ]

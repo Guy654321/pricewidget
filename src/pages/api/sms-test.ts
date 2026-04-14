@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { sendOwnerSms, sendCustomerSms } from '../../lib/notifications';
+import { isKvEnabled, kvDebugInfo } from '../../lib/storage';
 
 export const prerender = false;
 
@@ -11,7 +12,7 @@ const env = (key: string): string | undefined => {
 };
 
 /**
- * GET  /api/sms-test  — check which Twilio env vars are set (no values exposed)
+ * GET  /api/sms-test  — check which env vars are set (no values exposed)
  * POST /api/sms-test  — send a real test SMS to OWNER_PHONE
  */
 export const GET: APIRoute = async () => {
@@ -23,6 +24,7 @@ export const GET: APIRoute = async () => {
     'GMAIL_USER',
     'GMAIL_APP_PASSWORD',
     'OWNER_EMAIL',
+    'BLOB_READ_WRITE_TOKEN',
   ];
 
   const status: Record<string, string> = {};
@@ -45,7 +47,14 @@ export const GET: APIRoute = async () => {
     Boolean(env('TWILIO_FROM_NUMBER'));
 
   return new Response(
-    JSON.stringify({ twilioReady: ready, ownerPhoneSet: Boolean(env('OWNER_PHONE')), vars: status }),
+    JSON.stringify({
+      twilioReady: ready,
+      ownerPhoneSet: Boolean(env('OWNER_PHONE')),
+      kvEnabled: isKvEnabled,
+      kvDebug: kvDebugInfo,
+      blobConfigured: Boolean(env('BLOB_READ_WRITE_TOKEN')),
+      vars: status,
+    }),
     { status: 200, headers: JSON_HEADERS }
   );
 };

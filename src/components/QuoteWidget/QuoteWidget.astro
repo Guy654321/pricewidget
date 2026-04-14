@@ -185,7 +185,7 @@ const availability = jsonAvailability || { enabled: false };
       <div class="ds-svc-screen-inner">
         <p class="ds-screen-title">What can we help with?</p>
 
-        <div class="ds-service-grid">
+        <div class="ds-service-grid" id="ds-service-grid">
 
           {SERVICES.map((svc) => (
             <button class="ds-service-card" data-service={svc.id} type="button" aria-label={svc.label}>
@@ -448,20 +448,7 @@ const availability = jsonAvailability || { enabled: false };
   var TRUST_SIGNALS = trustSignals;
   var AVAILABILITY  = availability;
   var LOCAL_CONFIG_KEY = 'derby_services_config_v1';
-
-  try {
-    var localRaw = window.localStorage.getItem(LOCAL_CONFIG_KEY);
-    if (localRaw) {
-      var localConfig = JSON.parse(localRaw);
-      if (localConfig && Array.isArray(localConfig.services)) SERVICES = localConfig.services;
-      if (localConfig && localConfig.contact) CONTACT = localConfig.contact;
-      if (localConfig && localConfig.trustSignals) TRUST_SIGNALS = localConfig.trustSignals;
-      if (localConfig && localConfig.availability) AVAILABILITY = localConfig.availability;
-      if (localConfig && localConfig.priceFlow) PRICE_FLOW = localConfig.priceFlow;
-    }
-  } catch (_) {
-    // Ignore invalid local override data.
-  }
+  var CONFIG_ENDPOINT = '/api/config';
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
   var panel          = document.getElementById('ds-panel');
@@ -474,6 +461,7 @@ const availability = jsonAvailability || { enabled: false };
   var step2          = document.getElementById('ds-step-2');
   var step3          = document.getElementById('ds-step-3');
   var announcer      = document.getElementById('ds-announcer');
+  var serviceGrid    = document.getElementById('ds-service-grid');
   var questionsBody  = document.getElementById('ds-questions-body');
   var questionsFooter = document.getElementById('ds-questions-footer');
   var seePricingBtn  = document.getElementById('ds-see-pricing');
@@ -630,30 +618,138 @@ const availability = jsonAvailability || { enabled: false };
   });
 
   // ── Service card routing ─────────────────────────────────────────────────────
-  panel.querySelectorAll('[data-service]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var id = btn.getAttribute('data-service');
-      if (id === 'new_door') {
-        fireGtm('rep_screen_shown');
-        goTo('rep');
-        return;
-      }
-      if (id === 'something_else') {
-        fireGtm('chat_path_selected');
-        goTo('chat');
-        return;
-      }
-      selectedServiceId = id;
-      selectedPill = null;
-      fireGtm('service_selected', { service_id: id });
-      // Opener replacement gets the visual guide first
-      if (id === 'opener_replace') {
-        goTo('opener_guide');
-      } else {
-        goTo('questions');
-      }
+  function handleServiceSelection(id) {
+    if (!id) return;
+    if (id === 'new_door') {
+      fireGtm('rep_screen_shown');
+      goTo('rep');
+      return;
+    }
+    if (id === 'something_else') {
+      fireGtm('chat_path_selected');
+      goTo('chat');
+      return;
+    }
+    selectedServiceId = id;
+    selectedPill = null;
+    fireGtm('service_selected', { service_id: id });
+    // Opener replacement gets the visual guide first
+    if (id === 'opener_replace') {
+      goTo('opener_guide');
+    } else {
+      goTo('questions');
+    }
+  }
+
+  if (serviceGrid) {
+    serviceGrid.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('[data-service]') : null;
+      if (!btn || !serviceGrid.contains(btn)) return;
+      handleServiceSelection(btn.getAttribute('data-service'));
     });
-  });
+  }
+
+  function normalizeTier(tier) {
+    if (!tier || typeof tier !== 'object') return tier;
+    var out = Object.assign({}, tier);
+    if (!out.image) out.image = out.photo || out.photoUrl || out.imageUrl || '';
+    if (!out.summary && out.description) out.summary = out.description;
+    if (!Array.isArray(out.features)) out.features = [];
+    return out;
+  }
+
+  function normalizeService(svc) {
+    if (!svc || typeof svc !== 'object') return svc;
+    var out = Object.assign({}, svc);
+    if (!out.id && out.serviceId) out.id = out.serviceId;
+    if (!out.label && out.name) out.label = out.name;
+    if (!out.description && out.subtitle) out.description = out.subtitle;
+    if (!out.subtitle && out.description) out.subtitle = out.description;
+
+    if (!out.qualifier && out.question) {
+      out.qualifier = { question: out.question, pills: out.options || [] };
+    }
+    if (!out.qualifier || typeof out.qualifier !== 'object') {
+      out.qualifier = { question: 'Tell us more', pills: [{ label: 'Not sure' }] };
+    }
+    if (!out.qualifier.question) out.qualifier.question = 'Tell us more';
+    if (!Array.isArray(out.qualifier.pills)) out.qualifier.pills = [{ label: 'Not sure' }];
+    if (Array.isArray(out.tiers)) out.tiers = out.tiers.map(normalizeTier);
+    return out;
+  }
+
+  SERVICES = (SERVICES || []).map(normalizeService);
+
+  function renderServiceCards() {
+    if (!serviceGrid) return;
+    var baseCards = (SERVICES || []).map(function (svc) {
+      var iconPath = svc.icon || 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3l5 3v8H7V9l5-3z';
+      return (
+        '<button class="ds-service-card" data-service="' + escAttr(svc.id) + '" type="button" aria-label="' + escAttr(svc.label || svc.id) + '">' +
+          '<span class="ds-service-icon" aria-hidden="true">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">' +
+              '<path d="' + escAttr(iconPath) + '"/>' +
+            '</svg>' +
+          '</span>' +
+          '<span class="ds-service-name">' + esc(svc.label || svc.id) + '</span>' +
+        '</button>'
+      );
+    });
+
+    baseCards.push(
+      '<button class="ds-service-card" data-service="new_door" type="button" aria-label="New Door Installation">' +
+        '<span class="ds-service-icon" aria-hidden="true">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">' +
+            '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3l5 3v8H7V9l5-3z"/>' +
+          '</svg>' +
+        '</span>' +
+        '<span class="ds-service-name">New Door</span>' +
+        '<span class="ds-service-badge-sm">Specialist</span>' +
+      '</button>'
+    );
+    baseCards.push(
+      '<button class="ds-service-card" data-service="something_else" type="button" aria-label="Something else — chat with AI">' +
+        '<span class="ds-service-icon" aria-hidden="true">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">' +
+            '<path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>' +
+          '</svg>' +
+        '</span>' +
+        '<span class="ds-service-name">Not Sure? Chat with AI</span>' +
+      '</button>'
+    );
+
+    serviceGrid.innerHTML = baseCards.join('');
+  }
+
+  async function syncConfigFromApi() {
+    try {
+      var res = await fetch(CONFIG_ENDPOINT, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var payload = await res.json();
+      if (payload && Array.isArray(payload.services)) SERVICES = payload.services.map(normalizeService);
+      if (payload && payload.contact) CONTACT = payload.contact;
+      if (payload && payload.trustSignals) TRUST_SIGNALS = payload.trustSignals;
+      if (payload && payload.availability) AVAILABILITY = payload.availability;
+      if (payload && payload.priceFlow) PRICE_FLOW = payload.priceFlow;
+      try {
+        window.localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(payload));
+      } catch (_) {}
+    } catch (_) {
+      try {
+        var localRaw = window.localStorage.getItem(LOCAL_CONFIG_KEY);
+        if (!localRaw) return;
+        var localConfig = JSON.parse(localRaw);
+        if (localConfig && Array.isArray(localConfig.services)) SERVICES = localConfig.services.map(normalizeService);
+        if (localConfig && localConfig.contact) CONTACT = localConfig.contact;
+        if (localConfig && localConfig.trustSignals) TRUST_SIGNALS = localConfig.trustSignals;
+        if (localConfig && localConfig.availability) AVAILABILITY = localConfig.availability;
+        if (localConfig && localConfig.priceFlow) PRICE_FLOW = localConfig.priceFlow;
+      } catch (_) {
+        // Ignore invalid local fallback data.
+      }
+    }
+    renderServiceCards();
+  }
 
   // ── Opener Guide (data-driven from config) ───────────────────────────────────
   var OPENER_ICONS = {
@@ -1789,6 +1885,9 @@ const availability = jsonAvailability || { enabled: false };
   function escAttr(str) { return esc(str); }
 
   // ── Wire controls ─────────────────────────────────────────────────────────────
+  renderServiceCards();
+  syncConfigFromApi();
+
   trigger.addEventListener('click', openPanel);
   closeBtn.addEventListener('click', closePanel);
   backBtn.addEventListener('click', goBack);

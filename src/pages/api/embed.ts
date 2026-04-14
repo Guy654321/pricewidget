@@ -123,23 +123,25 @@ export const GET: APIRoute = async ({ url }) => {
   btn.innerHTML = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg><span>Instant Quote</span>';
   document.body.appendChild(btn);
 
-  // ── Iframe wrapper (lazy — only created on first click) ──
+  // ── Iframe wrapper (pre-mounted off-screen for instant open) ──
   var wrap = null;
   var iframe = null;
   var isOpen = false;
 
+  function mount() {
+    if (wrap) return;
+    wrap = document.createElement("div");
+    wrap.className = "ds-embed-iframe-wrap";
+    iframe = document.createElement("iframe");
+    iframe.src = BASE + "/?embed=1";
+    iframe.setAttribute("title", "Derby Strong Instant Quote");
+    iframe.setAttribute("allow", "camera");
+    wrap.appendChild(iframe);
+    document.body.appendChild(wrap);
+  }
+
   function open() {
-    if (!wrap) {
-      wrap = document.createElement("div");
-      wrap.className = "ds-embed-iframe-wrap";
-      iframe = document.createElement("iframe");
-      iframe.src = BASE + "/?embed=1";
-      iframe.setAttribute("loading", "lazy");
-      iframe.setAttribute("title", "Derby Strong Instant Quote");
-      iframe.setAttribute("allow", "camera");
-      wrap.appendChild(iframe);
-      document.body.appendChild(wrap);
-    }
+    mount();
     isOpen = true;
     wrap.dataset.open = "true";
     btn.style.display = "none";
@@ -152,6 +154,14 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   btn.addEventListener("click", open);
+
+  // Mount shortly after script execution so iframe/app/images can warm up
+  // before first interaction. This avoids delayed image pop-in on open.
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(mount, { timeout: 1200 });
+  } else {
+    setTimeout(mount, 500);
+  }
 
   // Listen for close messages from the widget iframe
   window.addEventListener("message", function(e) {

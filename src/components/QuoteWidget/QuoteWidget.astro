@@ -1939,6 +1939,7 @@ const availability = jsonAvailability || { enabled: false };
   function escAttr(str) { return esc(str); }
 
   // ── Wire controls ─────────────────────────────────────────────────────────────
+  preloadTierImages(SERVICES);
   renderServiceCards();
   syncConfigFromApi();
   startConfigAutoRefresh();

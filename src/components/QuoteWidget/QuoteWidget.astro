@@ -738,12 +738,31 @@ const availability = jsonAvailability || { enabled: false };
     }
   }
 
+  var preloadedImageUrls = Object.create(null);
+  function preloadTierImages(services) {
+    if (!Array.isArray(services)) return;
+    services.forEach(function (svc) {
+      if (!svc || !Array.isArray(svc.tiers)) return;
+      svc.tiers.forEach(function (tier) {
+        var src = tier && typeof tier.image === 'string' ? tier.image : '';
+        if (!src || preloadedImageUrls[src]) return;
+        var img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+        preloadedImageUrls[src] = true;
+      });
+    });
+  }
+
   function applyLiveConfig(payload) {
     var nextSig = configSignature(payload);
     var changed = nextSig && nextSig !== lastConfigSignature;
     if (nextSig) lastConfigSignature = nextSig;
 
-    if (payload && Array.isArray(payload.services)) SERVICES = payload.services.map(normalizeService);
+    if (payload && Array.isArray(payload.services)) {
+      SERVICES = payload.services.map(normalizeService);
+      preloadTierImages(SERVICES);
+    }
     if (payload && payload.contact) CONTACT = payload.contact;
     if (payload && payload.trustSignals) TRUST_SIGNALS = payload.trustSignals;
     if (payload && payload.availability) AVAILABILITY = payload.availability;
@@ -1090,7 +1109,7 @@ const availability = jsonAvailability || { enabled: false };
         ? '<span class="ds-tier-popular-badge">Most Popular</span>' : '';
 
       var imageHtml = tier.image
-        ? '<div class="ds-tier-img-wrap"><img class="ds-tier-img" src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="lazy" decoding="async" width="300" height="180"></div>'
+        ? '<div class="ds-tier-img-wrap"><img class="ds-tier-img" src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="eager" decoding="async" fetchpriority="high" width="300" height="180"></div>'
         : '';
 
       var priceRangeHtml = tier.priceRange

@@ -1240,42 +1240,13 @@ export const prerender = false;
       window.URL.revokeObjectURL(url);
     }
 
-    function isInlineImageDataUrl(value) {
-      return typeof value === 'string' && /^data:image\//i.test(value);
-    }
-
-    async function uploadDataUrlImage(dataUrl, fallbackName) {
-      var response = await fetch(dataUrl);
-      if (!response.ok) throw new Error('Could not read image data.');
-      var blob = await response.blob();
-      var ext = (blob.type && blob.type.split('/')[1]) || 'png';
-      if (ext === 'svg+xml') ext = 'svg';
-      var fileName = (fallbackName || 'upload').replace(/[^a-zA-Z0-9_-]/g, '_') + '.' + ext;
-      var file = new File([blob], fileName, { type: blob.type || 'image/png' });
-      var formData = new FormData();
-      formData.append('file', file);
-      var res = await fetch('/api/upload', { method: 'POST', body: formData });
-      var payload = await res.json();
-      if (!res.ok || !payload.path) throw new Error((payload && payload.error) || 'Image upload failed.');
-      return payload.path;
-    }
-
-    async function normalizeInlineImagesBeforeSave() {
-      if (!config || !Array.isArray(config.services)) return 0;
-      var converted = 0;
-      for (var si = 0; si < config.services.length; si++) {
-        var svc = config.services[si];
-        if (!svc || !Array.isArray(svc.tiers)) continue;
-        for (var ti = 0; ti < svc.tiers.length; ti++) {
-          var tier = svc.tiers[ti];
-          if (!tier || !isInlineImageDataUrl(tier.image)) continue;
-          var safeServiceId = (svc.id || ('service_' + si));
-          var safeTier = (tier.label || ('tier_' + ti));
-          tier.image = await uploadDataUrlImage(tier.image, safeServiceId + '_' + safeTier);
-          converted += 1;
-        }
-      }
-      return converted;
+    function fileToDataUrl(file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function (e) { resolve(String(e.target.result || '')); };
+        reader.onerror = function () { reject(new Error('Could not read image file.')); };
+        reader.readAsDataURL(file);
+      });
     }
 
     // ── Load config ──────────────────────────────────────────────
@@ -1306,14 +1277,7 @@ export const prerender = false;
       statusEl.textContent = 'Saving...';
       statusEl.dataset.type = '';
       try {
-        statusEl.textContent = 'Preparing images...';
-        var convertedCount = await normalizeInlineImagesBeforeSave();
-        if (convertedCount > 0) {
-          renderEditor();
-          statusEl.textContent = 'Uploaded ' + convertedCount + ' image' + (convertedCount === 1 ? '' : 's') + '. Saving...';
-        } else {
-          statusEl.textContent = 'Saving...';
-        }
+        statusEl.textContent = 'Saving...';
         var res = await fetch('/api/config', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -1661,7 +1625,7 @@ export const prerender = false;
 
     function renderTierCard(si, ti, tier) {
       var imgPreview = tier.image
-        ? '<img src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="lazy" decoding="async" width="200" height="120">' +
+        ? '<img src="' + escAttr(tier.image) + '" alt="' + escAttr(tier.headline) + '" loading="eager" decoding="async" width="200" height="120">' +
           '<button class="admin-img-remove" data-clear-img="' + si + '-' + ti + '" type="button">&times;</button>'
         : '<div class="upload-hint"><strong>Click to upload</strong> or drag &amp; drop</div>';
 
@@ -2020,22 +1984,16 @@ export const prerender = false;
     }
 
     async function uploadImage(file, area, key) {
-      area.innerHTML = '<div class="upload-hint">Uploading...</div>';
-
-      var formData = new FormData();
-      formData.append('file', file);
+      area.innerHTML = '<div class="upload-hint">Processing...</div>';
 
       try {
-        var res = await fetch('/api/upload', { method: 'POST', body: formData });
-        var data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Upload failed');
-
-        var imgPath = data.path;
+        var dataUrl = await fileToDataUrl(file);
+        if (!dataUrl || !/^data:image\//i.test(dataUrl)) throw new Error('Invalid image data.');
         var tierCard = area.closest('.admin-tier-card');
-        tierCard.querySelector('[data-field="image"]').value = imgPath;
+        tierCard.querySelector('[data-field="image"]').value = dataUrl;
 
         area.innerHTML =
-          '<img src="' + escAttr(imgPath) + '" alt="Uploaded image" loading="lazy" decoding="async" width="200" height="120" />' +
+          '<img src="' + escAttr(dataUrl) + '" alt="Uploaded image" loading="eager" decoding="async" width="200" height="120" />' +
           '<button class="admin-img-remove" data-clear-img="' + key + '" type="button">&times;</button>';
 
         // Re-wire clear button
@@ -2046,7 +2004,7 @@ export const prerender = false;
         });
 
       } catch (err) {
-        area.innerHTML = '<div class="upload-hint" style="color:#ef4444">Upload failed: ' + esc(err.message) + '</div>';
+        area.innerHTML = '<div class="upload-hint" style="color:#ef4444">Image failed: ' + esc(err.message) + '</div>';
         rewireImageArea(area, key);
       }
     }

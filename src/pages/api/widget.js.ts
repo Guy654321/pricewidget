@@ -17,9 +17,9 @@ export const prerender = false;
  *   .toggle()  — toggle open/close
  *   .ready     — boolean, true once DOM is ready
  *
- * Fast LCP: nothing is rendered until .open() is called.
- * Iframe is lazy-loaded and panel animates in from the bottom-right (desktop)
- * or full-screen (mobile ≤520px).
+ * Fast LCP: no blocking layout/content changes on initial render.
+ * Iframe is mounted off-screen in idle time so first open is instant, then
+ * panel animates in from the bottom-right (desktop) or full-screen (mobile).
  */
 export const GET: APIRoute = async ({ url }) => {
   const baseUrl = `${url.protocol}//${url.host}`;
@@ -135,8 +135,12 @@ export const GET: APIRoute = async ({ url }) => {
 
   window.DerbyWidget = api;
 
-  // Preload iframe after 3s so it's ready when user clicks
-  setTimeout(function() { mount(); }, 3000);
+  // Preload iframe as soon as browser is idle so first interaction is instant.
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(function(){ mount(); }, { timeout: 1200 });
+  } else {
+    setTimeout(function(){ mount(); }, 500);
+  }
 
   // Auto-wire any element with [data-derby-widget="open"]
   function wireAuto() {

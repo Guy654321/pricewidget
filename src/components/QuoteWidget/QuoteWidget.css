@@ -927,6 +927,24 @@
 .ds-form-input.ds-input-error { border-color: var(--ds-error); }
 .ds-form-error-msg { font-size: 0.75rem; color: var(--ds-error); display: none; }
 .ds-form-error-msg[data-visible="true"] { display: block; }
+
+/* Consent checkbox */
+.ds-consent-row {
+  display: flex; align-items: flex-start; gap: 8px; padding-top: 2px;
+}
+.ds-consent-row input[type="checkbox"] {
+  width: 16px; height: 16px; min-width: 16px; margin-top: 1px;
+  accent-color: var(--ds-primary); cursor: pointer; border-radius: 3px;
+}
+.ds-consent-row label {
+  font-size: 0.7rem; line-height: 1.35; color: #64748b; cursor: pointer;
+  user-select: none;
+}
+.ds-consent-row.ds-consent-error label { color: var(--ds-error); }
+.ds-consent-row.ds-consent-error input[type="checkbox"] {
+  outline: 2px solid var(--ds-error); outline-offset: 1px;
+}
+
 .ds-booking-form-footer { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
 .ds-booking-submit {
   display: flex; align-items: center; justify-content: center; gap: 8px;

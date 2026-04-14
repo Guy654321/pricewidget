@@ -1122,6 +1122,10 @@ const availability = jsonAvailability || { enabled: false };
             '<input class="ds-form-input" id="ds-book-zip" name="zip" type="text" placeholder="40204" autocomplete="postal-code" inputmode="numeric" maxlength="5" />' +
             '<span class="ds-form-error-msg" id="ds-book-zip-err">Please enter a 5-digit ZIP code.</span>' +
           '</div>' +
+          '<div class="ds-consent-row" id="ds-book-consent-row">' +
+            '<input type="checkbox" id="ds-book-consent" />' +
+            '<label for="ds-book-consent">I agree to be contacted by Derby Strong Garage Doors via phone and text regarding my request.</label>' +
+          '</div>' +
         '</form>' +
         '<div class="ds-booking-form-footer">' +
           '<button class="ds-booking-submit" data-tier="' + escAttr(tier) + '" id="ds-booking-submit" type="button">Request Appointment</button>' +
@@ -1131,18 +1135,21 @@ const availability = jsonAvailability || { enabled: false };
 
     document.body.appendChild(modal);
 
-    var phoneInput = modal.querySelector('#ds-book-phone');
-    var zipInput   = modal.querySelector('#ds-book-zip');
-    var phoneErr   = modal.querySelector('#ds-book-phone-err');
-    var zipErr     = modal.querySelector('#ds-book-zip-err');
-    var submitBtn  = modal.querySelector('#ds-booking-submit');
-    var cancelBtn  = modal.querySelector('#ds-booking-cancel');
+    var phoneInput  = modal.querySelector('#ds-book-phone');
+    var zipInput    = modal.querySelector('#ds-book-zip');
+    var phoneErr    = modal.querySelector('#ds-book-phone-err');
+    var zipErr      = modal.querySelector('#ds-book-zip-err');
+    var consentBox  = modal.querySelector('#ds-book-consent');
+    var consentRow  = modal.querySelector('#ds-book-consent-row');
+    var submitBtn   = modal.querySelector('#ds-booking-submit');
+    var cancelBtn   = modal.querySelector('#ds-booking-cancel');
 
     cancelBtn.addEventListener('click', function () { modal.remove(); });
     modal.addEventListener('click', function (e) { if (e.target === modal) modal.remove(); });
     document.addEventListener('keydown', function closeOnEsc(e) {
       if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', closeOnEsc); }
     });
+    consentBox.addEventListener('change', function () { consentRow.classList.remove('ds-consent-error'); });
 
     submitBtn.addEventListener('click', function () {
       var phone = phoneInput.value.trim().replace(/\D/g, '');
@@ -1164,6 +1171,12 @@ const availability = jsonAvailability || { enabled: false };
       } else {
         zipInput.classList.remove('ds-input-error');
         zipErr.setAttribute('data-visible', 'false');
+      }
+      if (!consentBox.checked) {
+        consentRow.classList.add('ds-consent-error');
+        valid = false;
+      } else {
+        consentRow.classList.remove('ds-consent-error');
       }
       if (!valid) return;
 
@@ -1267,6 +1280,10 @@ const availability = jsonAvailability || { enabled: false };
             '<input class="ds-form-input" id="ds-cap-zip" name="zip" type="text" placeholder="40204" autocomplete="postal-code" inputmode="numeric" maxlength="5" />' +
             '<span class="ds-form-error-msg" id="ds-cap-zip-err">Please enter a 5-digit ZIP code.</span>' +
           '</div>' +
+          '<div class="ds-consent-row" id="ds-cap-consent-row">' +
+            '<input type="checkbox" id="ds-cap-consent" />' +
+            '<label for="ds-cap-consent">I agree to be contacted by Derby Strong Garage Doors via phone and text regarding my request.</label>' +
+          '</div>' +
         '</form>' +
         '<div class="ds-booking-form-footer">' +
           '<button class="ds-booking-submit" id="ds-capture-submit" type="button">See My Pricing</button>' +
@@ -1276,13 +1293,15 @@ const availability = jsonAvailability || { enabled: false };
 
     document.body.appendChild(modal);
 
-    var nameInput  = modal.querySelector('#ds-cap-name');
-    var phoneInput = modal.querySelector('#ds-cap-phone');
-    var zipInput   = modal.querySelector('#ds-cap-zip');
-    var phoneErr   = modal.querySelector('#ds-cap-phone-err');
-    var zipErr     = modal.querySelector('#ds-cap-zip-err');
-    var submitBtn  = modal.querySelector('#ds-capture-submit');
-    var cancelBtn  = modal.querySelector('#ds-capture-cancel');
+    var nameInput   = modal.querySelector('#ds-cap-name');
+    var phoneInput  = modal.querySelector('#ds-cap-phone');
+    var zipInput    = modal.querySelector('#ds-cap-zip');
+    var phoneErr    = modal.querySelector('#ds-cap-phone-err');
+    var zipErr      = modal.querySelector('#ds-cap-zip-err');
+    var consentBox  = modal.querySelector('#ds-cap-consent');
+    var consentRow  = modal.querySelector('#ds-cap-consent-row');
+    var submitBtn   = modal.querySelector('#ds-capture-submit');
+    var cancelBtn   = modal.querySelector('#ds-capture-cancel');
 
     // Pre-fill if already captured
     if (capturedLead) {
@@ -1297,6 +1316,7 @@ const availability = jsonAvailability || { enabled: false };
     document.addEventListener('keydown', function closeOnEsc(e) {
       if (e.key === 'Escape') { close(); document.removeEventListener('keydown', closeOnEsc); }
     });
+    consentBox.addEventListener('change', function () { consentRow.classList.remove('ds-consent-error'); });
 
     submitBtn.addEventListener('click', function () {
       var phone = phoneInput.value.trim().replace(/\D/g, '');
@@ -1318,6 +1338,12 @@ const availability = jsonAvailability || { enabled: false };
       } else {
         zipInput.classList.remove('ds-input-error');
         zipErr.setAttribute('data-visible', 'false');
+      }
+      if (!consentBox.checked) {
+        consentRow.classList.add('ds-consent-error');
+        valid = false;
+      } else {
+        consentRow.classList.remove('ds-consent-error');
       }
       if (!valid) return;
 

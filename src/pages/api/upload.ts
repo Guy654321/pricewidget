@@ -99,12 +99,13 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    // ── Strategy 3: Base64 data URL (universal fallback) ─────────
-    const dataUrl = `data:${mimeType};base64,${buffer.toString('base64')}`;
-
     return new Response(
-      JSON.stringify({ ok: true, path: dataUrl, storage: 'dataurl' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        error: process.env.VERCEL
+          ? 'Upload storage unavailable. Configure BLOB_READ_WRITE_TOKEN so images can persist.'
+          : 'Upload storage unavailable.',
+      }),
+      { status: 503, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err) {
     console.error('Upload error:', err);

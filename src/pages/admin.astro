@@ -1249,6 +1249,43 @@ export const prerender = false;
       });
     }
 
+    function optimizeImageDataUrl(sourceDataUrl) {
+      if (!sourceDataUrl || !/^data:image\//i.test(sourceDataUrl)) return Promise.resolve(sourceDataUrl);
+      if (/^data:image\/svg\+xml/i.test(sourceDataUrl)) return Promise.resolve(sourceDataUrl);
+
+      return new Promise(function (resolve) {
+        var img = new Image();
+        img.onload = function () {
+          var maxDim = 1400;
+          var w = img.naturalWidth || img.width || 0;
+          var h = img.naturalHeight || img.height || 0;
+          if (!w || !h) return resolve(sourceDataUrl);
+
+          var scale = Math.min(1, maxDim / Math.max(w, h));
+          var targetW = Math.max(1, Math.round(w * scale));
+          var targetH = Math.max(1, Math.round(h * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          var ctx = canvas.getContext('2d');
+          if (!ctx) return resolve(sourceDataUrl);
+          ctx.drawImage(img, 0, 0, targetW, targetH);
+
+          try {
+            var webp = canvas.toDataURL('image/webp', 0.82);
+            if (webp && webp.length < sourceDataUrl.length) return resolve(webp);
+          } catch (_) {}
+          try {
+            var jpeg = canvas.toDataURL('image/jpeg', 0.85);
+            if (jpeg && jpeg.length < sourceDataUrl.length) return resolve(jpeg);
+          } catch (_) {}
+          resolve(sourceDataUrl);
+        };
+        img.onerror = function () { resolve(sourceDataUrl); };
+        img.src = sourceDataUrl;
+      });
+    }
+
     // ── Load config ──────────────────────────────────────────────
     async function loadConfig() {
       try {
@@ -1987,7 +2024,8 @@ export const prerender = false;
       area.innerHTML = '<div class="upload-hint">Processing...</div>';
 
       try {
-        var dataUrl = await fileToDataUrl(file);
+        var rawDataUrl = await fileToDataUrl(file);
+        var dataUrl = await optimizeImageDataUrl(rawDataUrl);
         if (!dataUrl || !/^data:image\//i.test(dataUrl)) throw new Error('Invalid image data.');
         var tierCard = area.closest('.admin-tier-card');
         tierCard.querySelector('[data-field="image"]').value = dataUrl;

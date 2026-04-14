@@ -54,6 +54,17 @@ export const PUT: APIRoute = async ({ request }) => {
     });
   }
 
+  // Back up current config before overwriting, so we can restore if needed
+  try {
+    const currentRaw = await getRaw(STORAGE_KEY);
+    if (currentRaw) {
+      await setJSON(STORAGE_KEY + ':backup', JSON.parse(currentRaw));
+      await setJSON(STORAGE_KEY + ':backup_time', { t: new Date().toISOString() });
+    }
+  } catch (backupErr) {
+    console.error('[config] Backup failed (continuing with save):', backupErr);
+  }
+
   const ok = await setJSON(STORAGE_KEY, body);
   if (!ok) {
     return new Response(
@@ -67,4 +78,30 @@ export const PUT: APIRoute = async ({ request }) => {
   }
 
   return new Response(JSON.stringify({ ok: true }), { status: 200, headers: JSON_HEADERS });
+};
+
+// POST — restore config from backup
+export const POST: APIRoute = async ({ url }) => {
+  const action = url.searchParams.get('action');
+  if (action === 'restore') {
+    const backup = await getRaw(STORAGE_KEY + ':backup');
+    if (!backup) {
+      return new Response(JSON.stringify({ error: 'No backup found.' }), {
+        status: 404, headers: JSON_HEADERS,
+      });
+    }
+    const parsed = JSON.parse(backup);
+    const ok = await setJSON(STORAGE_KEY, parsed);
+    if (!ok) {
+      return new Response(JSON.stringify({ error: 'Restore failed.' }), {
+        status: 500, headers: JSON_HEADERS,
+      });
+    }
+    return new Response(JSON.stringify({ ok: true, restored: true }), {
+      status: 200, headers: JSON_HEADERS,
+    });
+  }
+  return new Response(JSON.stringify({ error: 'Unknown action.' }), {
+    status: 400, headers: JSON_HEADERS,
+  });
 };

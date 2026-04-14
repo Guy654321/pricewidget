@@ -112,8 +112,10 @@ function fsWrite(key: string, value: string): boolean {
 /**
  * Read a JSON value by key. Returns null if missing or unparseable.
  *
- * When KV is enabled but the key has never been written, falls back to
- * the bundled public/config/*.json file so first-deploy defaults work.
+ * When KV is enabled, ONLY reads from KV. Falls back to the bundled
+ * file ONLY if KV explicitly returns null (key never written), NOT on
+ * transient errors. This prevents stale bundled data from being served
+ * and accidentally saved back to KV, overwriting live edits.
  */
 export async function getJSON<T = unknown>(key: string): Promise<T | null> {
   if (isKvEnabled) {
@@ -125,7 +127,16 @@ export async function getJSON<T = unknown>(key: string): Promise<T | null> {
         return null;
       }
     }
-    // KV miss — fall through to bundled file as a seed
+    // KV returned null — could be a miss OR a transient error.
+    // Check if the key actually exists before falling back to bundled file.
+    const exists = await kvCommand<number>(['EXISTS', key]);
+    if (exists === 1) {
+      // Key exists in KV but GET returned null — transient error.
+      // Do NOT fall back to bundled file, return null to avoid serving stale data.
+      console.error('[storage] KV key exists but GET returned null — possible transient error for key:', key);
+      return null;
+    }
+    // Key truly doesn't exist in KV — safe to fall through to bundled file as seed
   }
   const raw = fsRead(key);
   if (raw == null) return null;
@@ -185,12 +196,20 @@ export function getRawFromFs(key: string): string | null {
 /**
  * Convenience: read raw text (used by /api/config, which streams the
  * services.json bytes straight back to the client).
+ *
+ * When KV is enabled, only falls back to bundled file if the key truly
+ * doesn't exist in KV (not on transient errors).
  */
 export async function getRaw(key: string): Promise<string | null> {
   if (isKvEnabled) {
     const raw = await kvCommand<string>(['GET', key]);
     if (raw != null) return raw;
-    // KV miss — seed from bundled file
+    // Check if key actually exists before falling back
+    const exists = await kvCommand<number>(['EXISTS', key]);
+    if (exists === 1) {
+      console.error('[storage] KV key exists but GET returned null — possible transient error for key:', key);
+      return null;
+    }
   }
   return fsRead(key);
 }

@@ -827,7 +827,21 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 .ds-rep-inner { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
 .ds-rep-intro { font-size: 0.875rem; color: var(--ds-ink-2); line-height: 1.65; }
-.ds-rep-calls { display: flex; flex-direction: column; gap: 10px; }
+.ds-rep-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-r-md);
+  background: #f9fbfb;
+}
+.ds-rep-textarea { resize: vertical; min-height: 72px; }
+.ds-rep-submit { margin-top: 4px; min-height: 48px; }
+.ds-rep-form-note { margin: 0; font-size: 0.75rem; color: #64748b; line-height: 1.4; }
+.ds-rep-status { margin: 0; min-height: 1.25rem; font-size: 0.8125rem; font-weight: 700; }
+.ds-rep-status[data-state="success"] { color: #15803d; }
+.ds-rep-status[data-state="error"] { color: var(--ds-error); }
 .ds-rep-call-btn {
   display: flex; align-items: center; gap: 14px;
   padding: 14px 16px;

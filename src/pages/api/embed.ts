@@ -123,7 +123,7 @@ export const GET: APIRoute = async ({ url }) => {
   btn.innerHTML = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg><span>Instant Quote</span>';
   document.body.appendChild(btn);
 
-  // ── Iframe wrapper (pre-mounted off-screen for instant open) ──
+  // ── Iframe wrapper (mounted on quote intent or first open) ──
   var wrap = null;
   var iframe = null;
   var isOpen = false;
@@ -154,14 +154,9 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   btn.addEventListener("click", open);
-
-  // Mount shortly after script execution so iframe/app/images can warm up
-  // before first interaction. This avoids delayed image pop-in on open.
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(mount, { timeout: 1200 });
-  } else {
-    setTimeout(mount, 500);
-  }
+  btn.addEventListener("pointerenter", mount, { once: true, passive: true });
+  btn.addEventListener("pointerdown", mount, { once: true, passive: true });
+  btn.addEventListener("focus", mount, { once: true });
 
   // Listen for close messages from the widget iframe
   window.addEventListener("message", function(e) {
@@ -199,7 +194,7 @@ export const GET: APIRoute = async ({ url }) => {
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=300, s-maxage=600',
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
     },
   });
 };

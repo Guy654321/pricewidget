@@ -17,9 +17,9 @@ export const prerender = false;
  *   .toggle()  — toggle open/close
  *   .ready     — boolean, true once DOM is ready
  *
- * Fast LCP: no blocking layout/content changes on initial render.
- * Iframe is mounted off-screen in idle time so first open is instant, then
- * panel animates in from the bottom-right (desktop) or full-screen (mobile).
+ * Fast LCP: the iframe is created only after quote intent or the first open.
+ * The panel then animates in from the bottom-right (desktop) or full-screen
+ * (mobile), without downloading its hidden assets during the host page load.
  */
 export const GET: APIRoute = async ({ url }) => {
   const baseUrl = `${url.protocol}//${url.host}`;
@@ -135,19 +135,15 @@ export const GET: APIRoute = async ({ url }) => {
 
   window.DerbyWidget = api;
 
-  // Preload iframe as soon as browser is idle so first interaction is instant.
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(function(){ mount(); }, { timeout: 1200 });
-  } else {
-    setTimeout(function(){ mount(); }, 500);
-  }
-
   // Auto-wire any element with [data-derby-widget="open"]
   function wireAuto() {
     var els = document.querySelectorAll('[data-derby-widget="open"]');
     for (var i = 0; i < els.length; i++) {
       if (els[i].__dsWired) continue;
       els[i].__dsWired = true;
+      els[i].addEventListener("pointerenter", mount, { once: true, passive: true });
+      els[i].addEventListener("pointerdown", mount, { once: true, passive: true });
+      els[i].addEventListener("focus", mount, { once: true });
       els[i].addEventListener("click", function (ev) {
         ev.preventDefault();
         api.open();
@@ -173,7 +169,7 @@ export const GET: APIRoute = async ({ url }) => {
       'Content-Type': 'application/javascript; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Cache-Control': 'public, max-age=300, s-maxage=600',
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
     },
   });
 };
